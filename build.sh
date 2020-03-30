@@ -12,7 +12,7 @@ DIR_LIST=(base-notebook \
 
 for dir in "${DIR_LIST[@]}"
 do
-    if [ "$STAGE" == "build"] 
+    if [ "$STAGE" == "build" ] 
     then
         if [ "$dir" == "machine-learning-notebook" ]
         then
@@ -20,7 +20,7 @@ do
         else
             sudo docker build --rm -f "$dir/Dockerfile" -t $REPO/kf-$DIR_LIST:latest --build-arg REPO=$REPO "$DIR_LIST"
         fi
-    elif [ "$STAGE" == "push"]
+    elif [ "$STAGE" == "push" ]
     then
         if [ "$dir" == "machine-learning-notebook" ]
         then
