@@ -1,4 +1,4 @@
-ARG BASE_CONTAINER=adamjm32/kf-minimal-notebook
+ARG BASE_CONTAINER=adamjm32/kf-extension-notebook
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
@@ -10,8 +10,15 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.15.11/
 
 # Install KF python libs  (using pip as these are not in the conda repos)
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    pip install kfp \
+    pip install -e git://github.com/kubeflow-kale/kale.git#egg=kale \
+    kfp \
     kubeflow-fairing
+
+RUN git clone https://github.com/kubeflow-kale/jupyterlab-kubeflow-kale.git /jupyterlab-kubeflow-kale && \
+    cd /jupyterlab-kubeflow-kale && \
+    jlpm install && \
+    jlpm build && \
+    jupyter labextension install .
 
 
 
