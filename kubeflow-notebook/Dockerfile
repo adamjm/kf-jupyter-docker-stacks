@@ -14,11 +14,11 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     kfp \
     kubeflow-fairing
 
-RUN git clone https://github.com/kubeflow-kale/jupyterlab-kubeflow-kale.git /jupyterlab-kubeflow-kale && \
-    cd /jupyterlab-kubeflow-kale && \
-    jlpm install && \
-    jlpm build && \
-    jupyter labextension install .
+#RUN git clone https://github.com/kubeflow-kale/jupyterlab-kubeflow-kale.git /jupyterlab-kubeflow-kale && \
+#    cd /jupyterlab-kubeflow-kale && \
+#    jlpm install && \
+#    jlpm build && \
+#    jupyter labextension install .
 
 
 

@@ -14,7 +14,7 @@ COPY environment.yml /root/
 ARG IBM_POWERAI_LICENSE_ACCEPT=yes
 # Install Python 3 packages
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    conda env update --prefix ./wmlce --file /root/environment.yml  --prune && \
+    conda env update --prefix /opt/anaconda/envs/wmlce --file /root/environment.yml  --prune && \
     conda clean --all -f -y 
 
 # Import matplotlib the first time to build the font cache.
