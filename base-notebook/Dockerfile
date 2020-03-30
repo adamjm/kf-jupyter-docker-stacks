@@ -44,9 +44,10 @@ RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashr
 ARG PYTHON_VERSION=default
 
 # Install base python packages
-RUN /opt/anaconda/bin/conda config --prepend channels conda-forge && \
+RUN /opt/anaconda/bin/conda config --append channels conda-forge && \
 /opt/anaconda/bin/conda config --prepend channels \
-https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/
+https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/ && \
+/opt/anaconda/bin/conda config --append channels powerai 
 
 #conda config --set channel_priority strict
 
@@ -64,12 +65,12 @@ RUN conda install --quiet --yes -n base \
     'jupyterlab=2.0.1' && \
     conda clean --all -f -y 
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    conda install --quiet --yes -n wmlce 'ipykernel' && \
+    conda install --quiet --yes -n wmlce 'ipykernel=5.1.4=py37h39e3cac_0' && \
     python -m ipykernel install --user --name wmlce --display-name "Python (wmlce)"
 EXPOSE 8888
 
   
-
+RUN mkdir /home/jovyan
 # Copy local files as late as possible to avoid cache busting
 COPY start-notebook.sh /usr/local/bin/
 
