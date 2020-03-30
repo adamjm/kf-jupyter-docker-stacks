@@ -1,0 +1,30 @@
+# Distributed under the terms of the Modified BSD License.
+ARG BASE_CONTAINER=adamjm32/kf-minimal-notebook
+FROM $BASE_CONTAINER
+
+LABEL maintainer="Adam Makarucha"
+
+# Install Python 3 packages
+RUN conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
+    conda clean --all -f -y && \
+    # Activate ipywidgets extension in the environment that runs the notebook server
+    jupyter nbextension enable --py widgetsnbextension --sys-prefix && \
+    # Also activate ipywidgets extension for JupyterLab
+    # Check this URL for most recent compatibilities
+    # https://github.com/jupyter-widgets/ipywidgets/tree/master/packages/jupyterlab-manager
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager@^2.0.0 --no-build && \
+    jupyter labextension install @bokeh/jupyter_bokeh@^2.0.0 --no-build && \
+    jupyter labextension install jupyter-matplotlib@^0.7.2 --no-build && \
+    jupyter lab build && \
+    jupyter lab clean && \
+    npm cache clean --force && \
+    rm -rf /home/root/.cache/yarn && \
+    rm -rf /home/root/.node-gyp
+
+# Install facets which does not have a pip or conda package at the moment
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && cd /tmp && \
+    git clone https://github.com/PAIR-code/facets.git && \
+    cd facets && \
+    jupyter nbextension install facets-dist/ --sys-prefix && \
+    cd && \
+    rm -rf /tmp/facets
