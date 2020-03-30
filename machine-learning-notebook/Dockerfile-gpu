@@ -5,8 +5,8 @@ ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
 
 #Install python Machine learning libraries for processing large scale data processing (see https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/#/ for details )
-RUN conda create --name powerai && eval "$(conda shell.bash hook |sed 's/base/powerai/g')" && \
-    conda install --quiet --yes -n powerai \
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    conda install --quiet --yes -n wmlce \
     powerai && \
     conda clean --all -f -y 
 
