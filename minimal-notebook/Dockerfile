@@ -1,4 +1,5 @@
-ARG BASE_CONTAINER=adamjm32/kf-base-notebook
+ARG REPO=adamjm32
+ARG BASE_CONTAINER=$REPO/kf-base-notebook
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"

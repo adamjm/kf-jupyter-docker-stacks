@@ -1,5 +1,6 @@
 # Distributed under the terms of the Modified BSD License.
-ARG BASE_CONTAINER=adamjm32/kf-minimal-notebook
+ARG REPO=adamjm32
+ARG BASE_CONTAINER=$REPO/kf-minimal-notebook
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"

@@ -1,6 +1,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-ARG BASE_CONTAINER=adamjm32/kf-kubeflow-notebook
+ARG REPO=adamjm32
+ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"
