@@ -5,6 +5,7 @@ ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"
+USER root
 
 # ffmpeg for matplotlib anim & dvipng for latex labels
 RUN apt-get update && \
@@ -23,3 +24,5 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
 # Import matplotlib the first time to build the font cache.
 ENV XDG_CACHE_HOME /home/root/.cache/
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && MPLBACKEND=Agg python -c "import matplotlib.pyplot" 
+
+USER jovyan

@@ -4,11 +4,25 @@ FROM ibmcom/powerai:1.7.0-base-ubuntu18.04-py37
 
 LABEL maintainer="Adam Makarucha"
 
+ARG NB_USER=jovyan
+
 USER root
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
 ENV DEBIAN_FRONTEND noninteractive
+
+ENV NB_USER $NB_USER
+
+ENV NB_UID 1000
+ENV HOME /home/$NB_USER
+ENV NB_PREFIX /
+ENV PATH $HOME/.local/bin:$PATH
+
+# Use bash instead of sh
+SHELL ["/bin/bash", "-c"]
+
+
 RUN apt-get update \
  && apt-get install -yq --no-install-recommends \
     wget \
@@ -23,6 +37,8 @@ RUN apt-get update \
     vim \
     npm \ 
     unzip \
+    g++ \
+     build-essential \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
@@ -37,11 +53,16 @@ ENV CONDA_DIR=/opt/anaconda \
     NB_PREFIX=/ \
     LANGUAGE=en_US.UTF-8
 ENV PATH=$CONDA_DIR/bin:$PATH 
-
+ADD source dest
 # Enable prompt color in the skeleton .bashrc before creating the default NB_USER
 RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashrc
 
 ARG PYTHON_VERSION=default
+
+RUN useradd -M -s /bin/bash -N -u $NB_UID $NB_USER && \
+    chown -R ${NB_USER}:users /usr/local/bin && \
+    mkdir -p $HOME && \
+    chown -R ${NB_USER}:users ${HOME}
 
 # Install base python packages
 RUN /opt/anaconda/bin/conda config --append channels conda-forge && \
@@ -70,10 +91,9 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
 EXPOSE 8888
 
   
-RUN mkdir /home/jovyan
 # Copy local files as late as possible to avoid cache busting
 COPY start-notebook.sh /usr/local/bin/
-
+USER jovyan
 # Configure container startup
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["start-notebook.sh"]

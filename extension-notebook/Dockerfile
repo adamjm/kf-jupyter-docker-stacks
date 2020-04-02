@@ -4,7 +4,7 @@ ARG BASE_CONTAINER=$REPO/kf-minimal-notebook
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"
-
+USER root
 # Install Python 3 packages
 RUN conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
     conda clean --all -f -y && \
@@ -29,3 +29,5 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && cd /tmp && \
     jupyter nbextension install facets-dist/ --sys-prefix && \
     cd && \
     rm -rf /tmp/facets
+
+USER jovyan

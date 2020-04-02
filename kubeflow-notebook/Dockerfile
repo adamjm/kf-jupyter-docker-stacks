@@ -3,7 +3,7 @@ ARG BASE_CONTAINER=$REPO/kf-extension-notebook
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
-
+USER root
 # Install kubernetes based cli's
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.15.11/bin/linux/$ARCH/kubectl && \ 
      chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl && \
@@ -20,6 +20,8 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
 #    jlpm install && \
 #    jlpm build && \
 #    jupyter labextension install .
+
+USER jovyan
 
 
 

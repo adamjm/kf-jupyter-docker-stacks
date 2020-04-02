@@ -1,11 +1,77 @@
-ARG BASE_CONTAINER=adamjm32/kf-gpu-notebook
+ARG BASE_CONTAINER=adamjm32/kf-machine-learning-notebook-gpu
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 
 LABEL maintainer="Adam Makarucha"
 
+USER root
+
+## Compile CUDF from source to enable it to work with existing dependancies
+ENV DEBIAN_FRONTEND=noninteractive
+
+ARG CC=5
+ARG CXX=5
+RUN apt update -y --fix-missing && \
+    apt upgrade -y && \
+    apt install -y \
+      git \
+      gcc-${CC} \
+      g++-${CXX} \
+      build-essential \
+      libboost-all-dev \
+      tzdata
+
+# Install conda
+# Enables "source activate conda"
+
+COPY cudf_dev_cuda10.2_${ARCH}.yml /root/cudf_environment.yml
+# Get CUDF
+
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    conda install --quiet --yes -n wmlce \
-    -c rapidsai-nightly -c nvidia -c conda-forge \
-    -c defaults rapids=0.13 python=3.7 cudatoolkit=10.2 && \
+    conda install --quiet --yes -n wmlce "python-graphviz=0.13.2" "streamz=0.5.2" && \
+    conda env update --prefix /opt/anaconda/envs/wmlce --file /root/cudf_environment.yml  --prune && \
     conda clean --all -f -y 
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    #mkdir /cupy && \
+    #git clone https://github.com/cupy/cupy.git /cupy && \
+    #cd /cupy && \
+    #git checkout -b v8.0.0a1 && \
+    pip install cupy-cuda102
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /rmm && \
+    git clone --recurse-submodules https://github.com/rapidsai/rmm.git && \
+    cd /rmm && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX && \
+    make -j 4 && \
+    make install && \
+    cd /rmm/python && \
+    python setup.py build_ext --inplace && \
+    python setup.py install
+
+RUN mkdir /cudf && \
+    git clone https://github.com/rapidsai/cudf.git /cudf && \
+    cd /cudf && \
+    git checkout -b branch-0.12 && \
+    git submodule update --init --remote --recursive
+
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    cd /cudf/cpp && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON && \
+    make -j 4 && \
+    make install && \
+    cd /cudf/python/nvstrings && \
+    python setup.py install && \
+    cd /cudf/python/cudf && \
+    python setup.py build_ext --inplace && \
+    python setup.py install && \
+    cd /cudf/python/dask_cudf && \
+    python setup.py install 
+
+USER jovyan
