@@ -36,7 +36,7 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH} \
     HADOOP_HOME=/hadoop/ \
     ARROW_LIBHDFS_DIR=${HADOOP_HOME}/lib/native
     
-USER jovyan
+USER $NB_UID
 
  
 

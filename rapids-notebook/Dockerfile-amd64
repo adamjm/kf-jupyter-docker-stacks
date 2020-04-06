@@ -24,20 +24,25 @@ RUN apt update -y --fix-missing && \
 # Install conda
 # Enables "source activate conda"
 
-COPY cudf_dev_cuda10.2_${ARCH}.yml /root/cudf_environment.yml
+
+USER $NB_UID
+
+COPY cudf_dev_cuda10.2_${ARCH}.yml /tmp/cudf_environment.yml
 # Get CUDF
 
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     conda install --quiet --yes -n wmlce "python-graphviz=0.13.2" "streamz=0.5.2" && \
-    conda env update --prefix /opt/anaconda/envs/wmlce --file /root/cudf_environment.yml  --prune && \
-    conda clean --all -f -y 
+    conda env update --prefix /opt/anaconda/envs/wmlce --file /tmp/cudf_environment.yml  --prune && \
+    conda clean --all -f -y && \
+    pip install cupy-cuda102 && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+#RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     #mkdir /cupy && \
     #git clone https://github.com/cupy/cupy.git /cupy && \
     #cd /cupy && \
     #git checkout -b v8.0.0a1 && \
-    pip install cupy-cuda102
 
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     mkdir /rmm && \

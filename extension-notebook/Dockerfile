@@ -4,7 +4,8 @@ ARG BASE_CONTAINER=$REPO/kf-minimal-notebook
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"
-USER root
+
+USER $NB_UID
 # Install Python 3 packages
 RUN conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
     conda clean --all -f -y && \
@@ -20,7 +21,9 @@ RUN conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
     jupyter lab clean && \
     npm cache clean --force && \
     rm -rf /home/root/.cache/yarn && \
-    rm -rf /home/root/.node-gyp
+    rm -rf /home/root/.node-gyp && \
+    fix-permissions $home && \
+    fix-permissions $conda_dir
 
 # Install facets which does not have a pip or conda package at the moment
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && cd /tmp && \
@@ -28,6 +31,8 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && cd /tmp && \
     cd facets && \
     jupyter nbextension install facets-dist/ --sys-prefix && \
     cd && \
-    rm -rf /tmp/facets
+    rm -rf /tmp/facets && \
+    fix-permissions $home && \
+    fix-permissions $conda_dir
 
-USER jovyan
+USER $NB_UID
