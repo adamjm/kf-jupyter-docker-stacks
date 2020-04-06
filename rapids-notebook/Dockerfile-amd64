@@ -45,38 +45,38 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     #git checkout -b v8.0.0a1 && \
 
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    mkdir /rmm && \
-    git clone --recurse-submodules https://github.com/rapidsai/rmm.git && \
-    cd /rmm && \
+    mkdir /tmp/rmm && \
+    git clone --recurse-submodules https://github.com/rapidsai/rmm.git /tmp/rmm && \
+    cd /tmp/rmm && \
     mkdir build && \
     cd build && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX && \
     make -j 4 && \
     make install && \
-    cd /rmm/python && \
+    cd /tmp/rmm/python && \
     python setup.py build_ext --inplace && \
-    python setup.py install
-
-RUN mkdir /cudf && \
-    git clone https://github.com/rapidsai/cudf.git /cudf && \
-    cd /cudf && \
-    git checkout -b branch-0.12 && \
-    git submodule update --init --remote --recursive
-
+    python setup.py install && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    cd /cudf/cpp && \
+    mkdir /tmp/cudf && \
+    git clone https://github.com/rapidsai/cudf.git /tmp/cudf && \
+    cd /tmp/cudf && \
+    git checkout -b branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cudf/cpp && \
     mkdir build && \
     cd build && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON && \
     make -j 4 && \
     make install && \
-    cd /cudf/python/nvstrings && \
+    cd /tmp/cudf/python/nvstrings && \
     python setup.py install && \
-    cd /cudf/python/cudf && \
+    cd /tmp/cudf/python/cudf && \
     python setup.py build_ext --inplace && \
     python setup.py install && \
-    cd /cudf/python/dask_cudf && \
-    python setup.py install 
-
-USER jovyan
+    cd /tmp/cudf/python/dask_cudf && \
+    python setup.py install && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
