@@ -36,6 +36,8 @@ RUN apt-get update \
     npm \ 
     unzip \
     g++ \
+    libffi-dev \
+    libssl-dev \
      build-essential \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
