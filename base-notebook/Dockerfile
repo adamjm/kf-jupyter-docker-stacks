@@ -19,7 +19,7 @@ SHELL ["/bin/bash", "-c"]
 
 
 RUN apt-get update \
- && apt-get install -yq --no-install-recommends \
+ && apt-get install -y \
     wget \
     bzip2 \
     cmake \
@@ -34,10 +34,13 @@ RUN apt-get update \
     vim \
     wget \
     npm \ 
+    node-gyp \ 
+    nodejs-dev \
+    libssl1.0-dev \
     unzip \
-    g++ \
+    g++-5 \
+    gcc-5 \
     libffi-dev \
-    libssl-dev \
      build-essential \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
