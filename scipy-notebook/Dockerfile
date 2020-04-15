@@ -3,7 +3,7 @@
 ARG REPO=adamjm32
 ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook
 FROM $BASE_CONTAINER
-
+#FROM ibmcom/powerai:1.7.0-all-ubuntu18.04-py37
 LABEL maintainer="Adam Makarucha"
 USER root
 
@@ -14,14 +14,19 @@ RUN apt-get update && \
 
 USER $NB_UID
 
-COPY environment.yml /tmp/
-
+COPY environment_amd64.yml /tmp/
+COPY environment_ppc64le.yml /tmp/
+ARG ARCH
 ARG IBM_POWERAI_LICENSE_ACCEPT=yes
 ENV IBM_POWERAI_LICENSE_ACCEPT=yes
+ARG PATH=/opt/anaconda/bin:$PATH
+ENV PATH=/opt/anaconda/bin:$PATH
+
+SHELL ["/bin/bash", "-c"]
 # Install Python 3 packages
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
-    conda env update --prefix /opt/anaconda/envs/wmlce --file /tmp/environment.yml  --prune && \
+    conda env update --prefix /opt/anaconda/envs/wmlce --file /tmp/environment_${ARCH}.yml  && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
