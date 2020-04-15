@@ -3,6 +3,7 @@
 REPO=$1
 STAGE=$2
 SUDO=$3
+ARCH=`uname -m`
 
 DIR_LIST=(base-notebook minimal-notebook extension-notebook kubeflow-notebook scipy-notebook machine-learning-notebook)
 
@@ -12,9 +13,11 @@ do
     then
         if [ "$dir" == "machine-learning-notebook" ]
         then
-            $SUDO docker build --rm -f "$dir/Dockerfile-gpu" -t $REPO/kf-$dir-gpu:latest --build-arg REPO=$REPO "$dir"
+            echo $ARCH
+            $SUDO docker build --rm -f "$dir/Dockerfile-gpu" -t $REPO/kf-$dir-gpu:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH "$dir"
         else
-           $SUDO docker build --rm -f "$dir/Dockerfile" -t $REPO/kf-$dir:latest --build-arg REPO=$REPO "$dir"
+            echo $ARCH
+           $SUDO docker build --rm -f "$dir/Dockerfile" -t $REPO/kf-$dir:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH "$dir"
         fi
     elif [ "$STAGE" == "push" ]
     then
@@ -24,7 +27,18 @@ do
         else
             $SUDO docker push $REPO/kf-$dir:latest
         fi
-    fi
+    elif [ "$STAGE" == "tag-push" ]
+    then
+	if [ "$dir"  == "machine-learning-notebook" ]
+        then
+            $SUDO docker tag $REPO/kf-$dir-gpu:latest $REPO/kf-$dir-gpu-$ARCH:latest 
+            $SUDO docker push $REPO/kf-$dir-gpu-$ARCH:latest 
+        else
+            $SUDO docker tag $REPO/kf-$dir:latest $REPO/kf-$dir-$ARCH:latest
+            $SUDO docker push $REPO/kf-$dir-$ARCH:latest 
+        fi
+     fi
+
 done
 
 
