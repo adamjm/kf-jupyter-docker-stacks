@@ -37,6 +37,19 @@ do
             $SUDO docker tag $REPO/kf-$dir:latest $REPO/kf-$dir-$ARCH:latest
             $SUDO docker push $REPO/kf-$dir-$ARCH:latest 
         fi
+    elif [ "$STAGE" == "pull" ]
+    then
+	if [ "$dir"  == "machine-learning-notebook" ]
+        then
+            $SUDO docker pull $REPO/kf-$dir-gpu-$ARCH:latest 
+        else
+            if [ "$ARCH" == "x86_64" ]
+	    then
+            $SUDO docker pull $REPO/kf-$dir:latest 
+            else 
+            $SUDO docker pull $REPO/kf-$dir-$ARCH:latest 
+            fi
+        fi
      fi
 
 done
