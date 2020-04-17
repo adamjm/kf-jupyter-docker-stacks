@@ -4,6 +4,8 @@ FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
 
+USER root
+
 RUN apt-get update && apt-get install -yq --no-install-recommends \
     build-essential \
     emacs \
@@ -34,7 +36,7 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH} \
     HADOOP_HOME=/hadoop/ \
     ARROW_LIBHDFS_DIR=${HADOOP_HOME}/lib/native
     
-
+USER $NB_UID
 
  
 
