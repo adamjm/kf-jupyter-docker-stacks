@@ -16,7 +16,9 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Use bash instead of sh
 SHELL ["/bin/bash", "-c"]
-
+ARG SOURCE_LIST=empty
+COPY config.sh /tmp/config.sh
+RUN /tmp/config.sh
 
 RUN apt-get update \
  && apt-get install -y \
