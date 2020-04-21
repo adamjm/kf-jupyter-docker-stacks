@@ -16,7 +16,7 @@ spec:
   http:
   - match:
     - uri:
-        prefix: /{{ .Release.Namespace }}/minio/
+        prefix: /{{ .Release.Namespace }}/
     rewrite:
       uri: /minio/
     route:
