@@ -22,7 +22,6 @@ ARG HTTPS_PROXY
 ARG NO_PROXY
 COPY config.sh /tmp/config.sh
 RUN /tmp/config.sh
-COPY sources.list /etc/apt/sources.list
 
 RUN apt-get update \
  && apt-get install -y \
