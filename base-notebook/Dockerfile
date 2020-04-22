@@ -16,7 +16,12 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Use bash instead of sh
 SHELL ["/bin/bash", "-c"]
-
+ARG SOURCE_LIST=empty
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+COPY config.sh /tmp/config.sh
+RUN /tmp/config.sh
 
 RUN apt-get update \
  && apt-get install -y \
