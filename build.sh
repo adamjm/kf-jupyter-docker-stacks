@@ -37,10 +37,10 @@ do
     then
 	if [ "$dir"  == "machine-learning-notebook" ]
         then
-            $SUDO docker tag $REPO_OLD/kf-$dir-gpu:latest $REPO/kf-$dir-gpu-$ARCH:latest 
+            $SUDO docker tag $REPO_OLD/kf-$dir-gpu-$ARCH:latest $REPO/kf-$dir-gpu-$ARCH:latest 
             $SUDO docker push $REPO/kf-$dir-gpu-$ARCH:latest 
         else
-            $SUDO docker tag $REPO_OLD/kf-$dir:latest $REPO/kf-$dir-$ARCH:latest
+            $SUDO docker tag $REPO_OLD/kf-$dir-$ARCH:latest $REPO/kf-$dir-$ARCH:latest
             $SUDO docker push $REPO/kf-$dir-$ARCH:latest 
         fi
     elif [ "$STAGE" == "pull" ]
