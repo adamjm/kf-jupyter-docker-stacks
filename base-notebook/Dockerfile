@@ -72,7 +72,7 @@ RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashr
 COPY fix-permissions.sh /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
-RUN wget https://github.com/krallin/tini/archive/v0.18.0.tar.gz && \
+RUN export HTTP_PROXY=$HTTP_PROXY && export HTTPS_PROXY=$HTTP_PROXY && wget https://github.com/krallin/tini/archive/v0.18.0.tar.gz && \
     tar zxvf v0.18.0.tar.gz && \
     rm -rf v0.18.0.tar.gz
 WORKDIR tini-0.18.0/
