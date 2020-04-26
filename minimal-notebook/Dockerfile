@@ -26,15 +26,31 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     nano \
     openjdk-8-jdk \ 
     openjdk-8-jre \
+    libprotobuf-dev \
+    libprotobuf-java \
+    protobuf-compiler \
+    libprotoc-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH} \
+    HADOOP_HOME=/opt/hadoop/ \
+    ARROW_LIBHDFS_DIR=${HADOOP_HOME}/lib/native
+
+# Install dependancies to compile hadoop
+
+RUN mkdir /opt/maven && wget -c https://apache.mirror.digitalpacific.com.au/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz -O - | tar -xz -C /opt/maven
+
+ARG PATH=$PATH:/opt/maven/bin
+ENV PATH=${PATH}
+
 # Install hadoop to enable the connection into HDFS
-RUN mkdir /hadoop && wget -c http://apache.mirror.amaze.com.au/hadoop/common/hadoop-2.8.5/hadoop-2.8.5.tar.gz -O - | tar -xz -C /hadoop
+
+
+RUN mkdir /opt/hadoop-src && wget -c http://apache.mirror.serversaustralia.com.au/hadoop/common/hadoop-2.7.7/hadoop-2.7.7-src.tar.gz -O - | tar -xz -C /opt/hadoop-src && cd /opt/hadoop-src
 
 # Set the Environment variables needed
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH} \
-    HADOOP_HOME=/hadoop/ \
-    ARROW_LIBHDFS_DIR=${HADOOP_HOME}/lib/native
+
     
 USER $NB_UID
 
