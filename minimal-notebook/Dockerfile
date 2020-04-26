@@ -47,7 +47,7 @@ ENV PATH=${PATH}
 # Install hadoop to enable the connection into HDFS
 
 
-RUN mkdir /opt/hadoop-src && wget -c http://apache.mirror.serversaustralia.com.au/hadoop/common/hadoop-2.7.7/hadoop-2.7.7-src.tar.gz -O - | tar -xz -C /opt/hadoop-src && cd /opt/hadoop-src
+RUN mkdir /opt/hadoop-src && wget -c http://apache.mirror.serversaustralia.com.au/hadoop/common/hadoop-2.7.7/hadoop-2.7.7-src.tar.gz -O - | tar -xz -C /opt/hadoop-src && cd /opt/hadoop-src && mvn package -Pdist,native -DskipTests –Dtar && mkdir /opt/hadoop  && tar -xz hadoop-dist/target/hadoop-2.7.2.tar.gz -C /opt/hadoop
 
 # Set the Environment variables needed
 
