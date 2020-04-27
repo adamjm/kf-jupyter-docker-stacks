@@ -1,5 +1,6 @@
 ARG REPO=adamjm32
-ARG BASE_CONTAINER=$REPO/kf-base-notebook
+ARG ARCH
+ARG BASE_CONTAINER=$REPO/kf-base-notebook-$ARCH
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
@@ -29,7 +30,9 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install hadoop to enable the connection into HDFS
-RUN mkdir /hadoop && wget -c http://apache.mirror.amaze.com.au/hadoop/common/hadoop-2.8.5/hadoop-2.8.5.tar.gz -O - | tar -xz -C /hadoop
+RUN mkdir /tmp/hadoop && wget -c https://archive.apache.org/dist/hadoop/common/hadoop-2.7.7/hadoop-2.7.7-src.tar.gz -O - | tar -xvf -C /tmp/hadoop && \
+mvn package -Pdist,native -DskipTests –Dtar
+#RUN mkdir /hadoop && wget -c http://apache.mirror.amaze.com.au/hadoop/common/hadoop-2.8.5/hadoop-2.8.5.tar.gz -O - | tar -xz -C /hadoop
 
 # Set the Environment variables needed
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH} \
