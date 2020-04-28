@@ -1,6 +1,7 @@
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
-ARG BASE_CONTAINER=$REPO/kf-minimal-notebook
+ARG ARCH
+ARG BASE_CONTAINER=$REPO/kf-minimal-notebook-${ARCH}
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"

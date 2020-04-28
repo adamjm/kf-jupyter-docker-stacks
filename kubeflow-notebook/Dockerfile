@@ -9,12 +9,13 @@ USER root
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.15.11/bin/linux/$ARCH/kubectl && \ 
      chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl && \
      wget -c https://get.helm.sh/helm-v3.1.2-linux-$ARCH.tar.gz -O - | tar -xz -C /usr/local/bin/
-
+RUN git clone https://github.com/kubeflow-kale/kale.git /kale
 USER $NB_UID
 # Install KF python libs  (using pip as these are not in the conda repos)
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    pip install -e git://github.com/kubeflow-kale/kale.git#egg=kale \
-    kfp \
+    cd /kale/backend && \
+    pip install . && \
+    pip install kfp \
     kubeflow-fairing && \
     fix-permissions $home && \
     fix-permissions $conda_dir
