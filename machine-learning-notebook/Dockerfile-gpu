@@ -1,5 +1,6 @@
 ARG REPO=adamjm32
-ARG BASE_CONTAINER=$REPO/kf-scipy-notebook
+ARG ARCH
+ARG BASE_CONTAINER=$REPO/kf-scipy-notebook-${ARCH}
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 
