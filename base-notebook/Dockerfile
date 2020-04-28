@@ -40,7 +40,10 @@ RUN apt-get update \
     run-one \
     git \ 
     gnupg \ 
-    vim \
+    inetutils-ping \
+    netcat \
+    traceroute \
+    curl \
     wget \
     npm \ 
     node-gyp \ 

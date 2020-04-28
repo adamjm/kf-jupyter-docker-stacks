@@ -10,7 +10,7 @@ PROXY=$5
 HADOOP_URL=$6
 
 ARCH=`uname -m`
-export DOCKER_CLI_EXPERIMENTAL=true
+export DOCKER_CLI_EXPERIMENTAL=enabled
 if [ "$ARCH" == "x86_64" ]
 then
     ARCH=amd64
