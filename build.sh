@@ -15,7 +15,7 @@ if [ "$ARCH" == "x86_64" ]
 then
     ARCH=amd64
 fi
-DIR_LIST=(base-notebook minimal-notebook extension-notebook kubeflow-notebook scipy-notebook machine-learning-notebook pyspark-notebook baysian-notebook)
+DIR_LIST=(base-notebook minimal-notebook extension-notebook kubeflow-notebook scipy-notebook machine-learning-notebook rapids-notebook pyspark-notebook baysian-notebook)
 
 for dir in "${DIR_LIST[@]}"
 do
@@ -25,7 +25,11 @@ do
         then
             echo $ARCH
             $SUDO docker build --rm -f "$dir/Dockerfile-gpu" -t $REPO/kf-$dir-gpu-$ARCH:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL "$dir"
-        else
+        elif [ "$dir" == "rapids-notebook" ]
+        then
+            echo $ARCH
+            $SUDO docker build --rm -f "$dir/Dockerfile-$ARCH" -t $REPO/kf-$dir-$ARCH:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL "$dir"
+	else
             echo $ARCH
            $SUDO docker build --rm -f "$dir/Dockerfile" -t $REPO/kf-$dir-$ARCH:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE  --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL "$dir"
         fi
