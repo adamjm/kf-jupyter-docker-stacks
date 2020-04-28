@@ -2,11 +2,15 @@
 
 REPO=$1
 STAGE=$2
-REPO_OLD=$3
-SUDO=$4
+REPO_OLD=$7
+SUDO=$8
+SOURCE_LIST=$3
+TRUSTED_SOURCE=$4
+PROXY=$5
+HADOOP_URL=$6
 
 ARCH=`uname -m`
-
+export DOCKER_CLI_EXPERIMENTAL=true
 if [ "$ARCH" == "x86_64" ]
 then
     ARCH=amd64
@@ -20,10 +24,10 @@ do
         if [ "$dir" == "machine-learning-notebook" ]
         then
             echo $ARCH
-            $SUDO docker build --rm -f "$dir/Dockerfile-gpu" -t $REPO/kf-$dir-gpu:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH "$dir"
+            $SUDO docker build --rm -f "$dir/Dockerfile-gpu" -t $REPO/kf-$dir-gpu-$ARCH:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL "$dir"
         else
             echo $ARCH
-           $SUDO docker build --rm -f "$dir/Dockerfile" -t $REPO/kf-$dir:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH "$dir"
+           $SUDO docker build --rm -f "$dir/Dockerfile" -t $REPO/kf-$dir-$ARCH:latest --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE  --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL "$dir"
         fi
     elif [ "$STAGE" == "push" ]
     then
@@ -37,10 +41,10 @@ do
     then
 	if [ "$dir"  == "machine-learning-notebook" ]
         then
-            $SUDO docker tag $REPO_OLD/kf-$dir-gpu:latest $REPO/kf-$dir-gpu-$ARCH:latest 
+            $SUDO docker tag $REPO_OLD/kf-$dir-gpu-$ARCH:latest $REPO/kf-$dir-gpu-$ARCH:latest 
             $SUDO docker push $REPO/kf-$dir-gpu-$ARCH:latest 
         else
-            $SUDO docker tag $REPO_OLD/kf-$dir:latest $REPO/kf-$dir-$ARCH:latest
+            $SUDO docker tag $REPO_OLD/kf-$dir-$ARCH:latest $REPO/kf-$dir-$ARCH:latest
             $SUDO docker push $REPO/kf-$dir-$ARCH:latest 
         fi
     elif [ "$STAGE" == "pull" ]
@@ -60,6 +64,21 @@ do
             else 
             $SUDO docker pull $REPO/kf-$dir-$ARCH:latest 
             fi
+        fi
+     elif [ "$STAGE" == "manifest" ]
+     then
+	if [ "$dir"  == "machine-learning-notebook" ]
+        then
+            $SUDO docker manifest create $REPO/kf-$dir-gpu:latest $REPO/kf-$dir-gpu-amd64:latest $REPO/kf-$dir-gpu-ppc64le:latest --amend
+            $SUDO docker manifest annotate $REPO/kf-$dir-gpu:latest $REPO/kf-$dir-gpu-amd64:latest --os linux --arch amd64 
+            $SUDO docker manifest annotate $REPO/kf-$dir-gpu:latest $REPO/kf-$dir-gpu-ppc64le:latest --os linux --arch ppc64le
+            $SUDO docker manifest push $REPO/kf-$dir-gpu:latest 
+
+        else
+            $SUDO docker manifest create $REPO/kf-$dir:latest $REPO/kf-$dir-amd64:latest $REPO/kf-$dir-ppc64le:latest --amend
+            $SUDO docker manifest annotate $REPO/kf-$dir:latest $REPO/kf-$dir-amd64:latest --os linux --arch amd64
+            $SUDO docker manifest annotate $REPO/kf-$dir:latest $REPO/kf-$dir-ppc64le:latest --os linux --arch ppc64le 
+            $SUDO docker manifest push $REPO/kf-$dir:latest 
         fi
      fi
 

@@ -1,0 +1,23 @@
+{{- if .Values.poddefault.enabled -}}
+apiVersion: "kubeflow.org/v1alpha1"
+kind: PodDefault
+metadata:
+  name: add-proxy-hosts
+  labels:
+    app: {{ template "minio.name" . }}
+    chart: {{ template "minio.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+ selector:
+  matchLabels:
+    add-proxy-hosts: "true"
+ desc: "add proxy settings and hosts"
+ env:
+   - name: HTTP_PROXY
+     value: "http://10.195.30.203:8080"
+   - name: HTTPS_PROXY
+     value: "http://10.195.30.203:8080"
+   - name: NO_PROXY
+     value: "10.57.181.20, tail.oan, tail, 10.96.0.1"
+{{- end }}

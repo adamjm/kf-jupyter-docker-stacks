@@ -1,7 +1,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
-ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook
+ARG ARCH
+ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook-${ARCH}
 FROM $BASE_CONTAINER
 #FROM ibmcom/powerai:1.7.0-all-ubuntu18.04-py37
 LABEL maintainer="Adam Makarucha"

@@ -1,4 +1,5 @@
-ARG BASE_CONTAINER=adamjm32/kf-scipy-notebook
+ARG ARCH
+ARG BASE_CONTAINER=adamjm32/kf-scipy-notebook-${ARCH}
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 

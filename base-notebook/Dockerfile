@@ -16,7 +16,16 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Use bash instead of sh
 SHELL ["/bin/bash", "-c"]
+ARG SOURCE_LIST=empty
+ARG TRUSTED_SOURCE=empty
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTPS_PROXY}
 
+#ARG NO_PROXY
+COPY config.sh /tmp/config.sh
+RUN /tmp/config.sh
 
 RUN apt-get update \
  && apt-get install -y \
@@ -67,10 +76,11 @@ RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashr
 COPY fix-permissions.sh /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
-RUN wget https://github.com/krallin/tini/archive/v0.18.0.tar.gz && \
-    tar zxvf v0.18.0.tar.gz && \
-    rm -rf v0.18.0.tar.gz
-WORKDIR tini-0.18.0/
+RUN git clone https://github.com/krallin/tini.git /tini
+#wget https://github.com/krallin/tini/archive/v0.18.0.tar.gz && \
+  #  tar zxvf v0.18.0.tar.gz && \
+  #  rm -rf v0.18.0.tar.gz
+WORKDIR tini/
 RUN cmake . && make install
 RUN mv ./tini /usr/local/bin/tini  && \
     chmod +x /usr/local/bin/tini

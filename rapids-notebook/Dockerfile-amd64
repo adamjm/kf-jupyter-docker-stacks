@@ -1,4 +1,5 @@
-ARG BASE_CONTAINER=adamjm32/kf-machine-learning-notebook-gpu
+ARG ARCH
+ARG BASE_CONTAINER=adamjm32/kf-machine-learning-notebook-gpu-${ARCH}
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 

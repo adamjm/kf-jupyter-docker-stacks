@@ -1,0 +1,28 @@
+{{- if .Values.istioingress.enabled -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "minio.fullname" . }}
+  labels:
+    app: {{ template "minio.name" . }}
+    chart: {{ template "minio.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - '*'
+  http:
+  - match:
+    - uri:
+        prefix: /{{ .Release.Namespace }}/
+    rewrite:
+      uri: /minio/
+    route:
+    - destination:
+        host: {{ template "minio.fullname" . }}.{{ .Release.Namespace}}.svc.cluster.local
+        port:
+          number: 9000
+    timeout: 300s
+{{- end }}
