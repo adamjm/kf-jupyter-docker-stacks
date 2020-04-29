@@ -1,9 +1,10 @@
 ARG REPO=adamjm32
-ARG BASE_CONTAINER=$REPO/kf-base-notebook
+ARG ARCH
+ARG BASE_CONTAINER=$REPO/kf-base-notebook-$ARCH
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
-
+ARG HADOOP_URL
 USER root
 
 RUN apt-get update && apt-get install -yq --no-install-recommends \
@@ -32,6 +33,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     libprotoc-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install hadoop to enable the connection into HDFS
+RUN mkdir /hadoop && wget -c ${HADOOP_URL} -O - | tar -xz -C /hadoop
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH} \
     HADOOP_HOME=/opt/hadoop/ \
@@ -39,17 +42,12 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH} \
 
 # Install dependancies to compile hadoop
 
-RUN mkdir /opt/maven && wget -c https://apache.mirror.digitalpacific.com.au/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz -O - | tar -xz -C /opt/maven
 
 ARG PATH=$PATH:/opt/maven/bin
 ENV PATH=${PATH}
 
 # Install hadoop to enable the connection into HDFS
 
-
-RUN mkdir /opt/hadoop-src && wget -c http://apache.mirror.serversaustralia.com.au/hadoop/common/hadoop-2.7.7/hadoop-2.7.7-src.tar.gz -O - | tar -xz -C /opt/hadoop-src && cd /opt/hadoop-src && mvn package -Pdist,native -DskipTests –Dtar && mkdir /opt/hadoop  && tar -xz hadoop-dist/target/hadoop-2.7.2.tar.gz -C /opt/hadoop
-
-# Set the Environment variables needed
 
     
 USER $NB_UID
