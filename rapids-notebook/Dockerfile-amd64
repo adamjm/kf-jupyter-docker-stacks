@@ -80,3 +80,5 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     python setup.py install && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
+    
+    
