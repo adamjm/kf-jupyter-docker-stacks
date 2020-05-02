@@ -23,8 +23,10 @@ RUN apt update -y --fix-missing && \
       tzdata
 
 # Install conda
-# Enables "source activate conda"
+# Enables "source activate conda
 
+ARG CC=gcc 
+ARG CXX=g++
 
 USER $NB_UID
 
