@@ -6,8 +6,8 @@ REPO_OLD=$7
 SUDO=$8
 SOURCE_LIST=$3
 TRUSTED_SOURCE=$4
-PROXY=$5
-HADOOP_URL=$6
+PROXY=$6
+HADOOP_URL=$5
 
 ARCH=`uname -m`
 export DOCKER_CLI_EXPERIMENTAL=enabled
@@ -37,9 +37,9 @@ do
     then
         if [ "$dir" == "machine-learning-notebook" ]
         then
-            $SUDO docker push $REPO/kf-$dir-gpu:latest
+            $SUDO docker push $REPO/kf-$dir-gpu-$ARCH:latest
         else
-            $SUDO docker push $REPO/kf-$dir:latest
+            $SUDO docker push $REPO/kf-$dir-$ARCH:latest
         fi
     elif [ "$STAGE" == "tag-push" ]
     then
