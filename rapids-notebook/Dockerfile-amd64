@@ -43,11 +43,6 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-#RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    #mkdir /cupy && \
-    #git clone https://github.com/cupy/cupy.git /cupy && \
-    #cd /cupy && \
-    #git checkout -b v8.0.0a1 && \
 COPY rmm_CMakeLists.patch /tmp/
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     mkdir /tmp/rmm && \
@@ -87,3 +82,51 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     python setup.py install && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cuml && \
+    git clone https://github.com/rapidsai/cuml.git /tmp/cuml && \
+    cd /tmp/cuml && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cuml/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cuml/python/ && \
+    python setup.py build_ext --inplace && \
+    python setup.py install
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cugraph && \
+    git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
+    cd /tmp/cugraph && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cugraph/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cugraph/python/ && \
+    python setup.py build_ext --inplace && \
+    python setup.py install
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cuspatial && \
+    git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
+    cd /tmp/cuspatial && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cuspatial/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cuspatial/python/ && \
+    python setup.py build_ext --inplace && \
+    python setup.py install
