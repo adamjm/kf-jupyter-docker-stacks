@@ -28,6 +28,8 @@ RUN apt update -y --fix-missing && \
 ARG CC=gcc 
 ARG CXX=g++
 
+
+
 USER $NB_UID
 
 COPY cudf_dev_cuda10.2_${ARCH}.yml /tmp/cudf_environment.yml
@@ -46,14 +48,16 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     #git clone https://github.com/cupy/cupy.git /cupy && \
     #cd /cupy && \
     #git checkout -b v8.0.0a1 && \
-
+COPY rmm_CMakeLists.patch /tmp/
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     mkdir /tmp/rmm && \
     git clone --recurse-submodules https://github.com/rapidsai/rmm.git /tmp/rmm && \
     cd /tmp/rmm && \
+    git checkout branch-0.12 && \
+    patch CMakeLists.txt /tmp/rmm_CMakeLists.patch && \
     mkdir build && \
-    cd build && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TESTS=OFF && \
     make -j 4 && \
     make install && \
     cd /tmp/rmm/python && \
@@ -83,5 +87,5 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     python setup.py install && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
-    
-    
+   
+   
