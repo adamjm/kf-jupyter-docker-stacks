@@ -37,9 +37,6 @@ COPY cudf_dev_cuda10.2_${ARCH}.yml /tmp/cudf_environment.yml
 
 RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     conda install --quiet --yes -n wmlce "python-graphviz=0.13.2" "streamz=0.5.2" && \
- “cudatoolkit-dev” && \ 
- “gxx_linux-64=7” 
- && \
     conda env update --prefix /opt/anaconda/envs/wmlce --file /tmp/cudf_environment.yml  --prune && \
     conda clean --all -f -y && \
     pip install cupy-cuda102 && \
@@ -73,11 +70,11 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     mkdir /tmp/cudf && \
     git clone https://github.com/rapidsai/cudf.git /tmp/cudf && \
     cd /tmp/cudf && \
-    git checkout -b branch-0.12 && \
+    git checkout branch-0.12 && \
     git submodule update --init --remote --recursive && \
     cd /tmp/cudf/cpp && \
     mkdir build && \
-    cd build && \
+    cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON && \
     make -j 4 && \
     make install && \
@@ -90,5 +87,3 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     python setup.py install && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
-   
-   
