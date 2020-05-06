@@ -15,3 +15,35 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     conda clean --all -f -y 
 
 USER jovyan
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cugraph && \
+    git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
+    cd /tmp/cugraph && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cugraph/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cugraph/python/ && \
+    python setup.py build_ext --inplace && \
+    python setup.py install
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cuspatial && \
+    git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
+    cd /tmp/cuspatial && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cuspatial/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cuspatial/python/ && \
+    python setup.py build_ext --inplace && \
+    python setup.py install
