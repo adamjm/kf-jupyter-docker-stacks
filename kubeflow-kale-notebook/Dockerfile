@@ -15,6 +15,7 @@ USER $NB_UID
 RUN conda create --name kale && \
     conda install -n base "jupyterlab<2.0.0" && \
     conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
+    pip install kubeflow-kale && \
     # Activate ipywidgets extension in the environment that runs the notebook server
     jupyter nbextension enable --py widgetsnbextension --sys-prefix && \
     conda install -n kale "ipykernel" && \
@@ -26,13 +27,13 @@ RUN conda create --name kale && \
     fix-permissions $CONDA_DIR
 
 
-RUN eval "$(conda shell.bash hook |sed 's/base/kale/g')" && \
-    cd /kale/backend && \
-    pip install . && \
-    pip install kfp \
-    kubeflow-fairing && \
-    fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
+#RUN eval "$(conda shell.bash hook |sed 's/base/kale/g')" && \
+    #cd /kale/backend && \
+    #pip install . && \
+    #pip install kfp \
+    #kubeflow-fairing && \
+    #fix-permissions $HOME && \
+    #fix-permissions $CONDA_DIR
 
 
 
