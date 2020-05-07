@@ -12,13 +12,11 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.15.11/
 RUN git clone https://github.com/kubeflow-kale/kale.git /kale
 USER $NB_UID
 # Install KF python libs  (using pip as these are not in the conda repos)
-RUN conda create --name kale && \
-    conda install -n base "jupyterlab<2.0.0" && \
+RUN conda install -n base "jupyterlab<2.0.0" && \
     conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
+    pip install kubeflow-kale && \
     # Activate ipywidgets extension in the environment that runs the notebook server
     jupyter nbextension enable --py widgetsnbextension --sys-prefix && \
-    conda install -n kale "ipykernel" && \
-    python -m ipykernel install --user --name kale --display-name "Python (kale)" && \
     jupyter labextension install kubeflow-kale-launcher && \
     conda clean --all -f -y && \
     npm cache clean --force && \
@@ -26,13 +24,13 @@ RUN conda create --name kale && \
     fix-permissions $CONDA_DIR
 
 
-RUN eval "$(conda shell.bash hook |sed 's/base/kale/g')" && \
-    cd /kale/backend && \
-    pip install . && \
-    pip install kfp \
-    kubeflow-fairing && \
-    fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
+#RUN eval "$(conda shell.bash hook |sed 's/base/kale/g')" && \
+    #cd /kale/backend && \
+    #pip install . && \
+    #pip install kfp \
+    #kubeflow-fairing && \
+    #fix-permissions $HOME && \
+    #fix-permissions $CONDA_DIR
 
 
 
