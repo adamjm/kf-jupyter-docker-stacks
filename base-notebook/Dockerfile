@@ -92,7 +92,8 @@ ARG PYTHON_VERSION=default
 
 RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%admin/#%admin/' /etc/sudoers && \
-    sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
+    sed -i.bak -e 's/^%sudo/%jovyan/' /etc/sudoers && \
+    echo "jovyan ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir -p $CONDA_DIR && \
     chown -R $NB_USER:$NB_GID $CONDA_DIR && \
@@ -128,9 +129,7 @@ RUN conda install --quiet --yes -n base \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    conda install --quiet --yes -n wmlce 'ipykernel=5.1.4=py37h39e3cac_0' && \
-    python -m ipykernel install --user --name wmlce --display-name "Python (wmlce)" && \
+RUN conda install --quiet --yes -n base 'ipykernel=5.1.4=py37h39e3cac_0' && \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
