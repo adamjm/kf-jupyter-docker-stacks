@@ -34,7 +34,7 @@ RUN export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
 
 # Import matplotlib the first time to build the font cache.
 ENV XDG_CACHE_HOME /home/root/.cache/
-RUN MPLBACKEND=Agg python -c "import matplotlib.pyplot" && \
+RUN MPLBACKEND=Agg python3 -c "import matplotlib.pyplot" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 

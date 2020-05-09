@@ -1,4 +1,4 @@
-name: wmlce
+name: base
 channels:
   - powerai
   - http://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda
