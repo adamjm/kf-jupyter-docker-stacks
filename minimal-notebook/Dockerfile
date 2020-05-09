@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     libprotobuf-java \
     protobuf-compiler \
     libprotoc-dev \
+    unixodbc-dev \ 
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install hadoop to enable the connection into HDFS

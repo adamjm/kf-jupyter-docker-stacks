@@ -9,18 +9,34 @@ LABEL maintainer="Adam Makarucha"
 USER root
 
 #Install python Machine learning libraries for processing large scale data processing (see https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/#/ for details )
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    conda install --quiet --yes -n wmlce \
-    powerai-rapids && \
-    conda clean --all -f -y 
+RUN conda install --quiet --yes  \
+    powerai-rapids cmake cudatoolkit-dev=10.2.* && \
+    conda clean --all -f -y && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+RUN apt-get update && apt-get install -y libgdal-dev gdal-bin
+
+RUN conda install --quiet --yes  \
+    networkx python-louvain && \
+    conda clean --all -f -y && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+RUN mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
+    tar xvf peg-0.1.18.tar.gz && cd peg-0.1.18/ && \
+    make && make install && \
+    mkdir /tmp/libcypher && cd /tmp/libcypher && wget https://github.com/cleishm/libcypher-parser/releases/download/v0.6.1/libcypher-parser-0.6.1.tar.gz && \
+    tar xvf libcypher-parser-0.6.1.tar.gz && cd libcypher-parser-0.6.1/ &&  ./configure && \
+    make clean check && \
+    make install
 
 USER jovyan
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    mkdir /tmp/cugraph && \
+RUN mkdir /tmp/cugraph && \
     git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
     cd /tmp/cugraph && \
-    git checkout branch-0.12 && \
+    git checkout v0.11.0 && \
     git submodule update --init --remote --recursive && \
     cd /tmp/cugraph/cpp && \
     mkdir build && \
@@ -30,20 +46,32 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     make install && \
     cd /tmp/cugraph/python/ && \
     python setup.py build_ext --inplace && \
-    python setup.py install
+    python setup.py install && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    mkdir /tmp/cuspatial && \
+RUN mkdir /tmp/cudf && \
+    git clone https://github.com/rapidsai/cudf.git /tmp/cudf && \
+    cd /tmp/cudf && \
+    git checkout v0.11.0 && \
+    git submodule update --init --remote --recursive 
+
+ENV CUDF_HOME=/tmp/cudf/
+ARG CUDF_HOME=/tmp/cudf/
+
+RUN  mkdir /tmp/cuspatial && \
     git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
     cd /tmp/cuspatial && \
-    git checkout branch-0.12 && \
+    git checkout v0.11.0 && \
     git submodule update --init --remote --recursive && \
     cd /tmp/cuspatial/cpp && \
     mkdir build && \
     cd build  && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON && \
     make -j 4 && \
     make install && \
-    cd /tmp/cuspatial/python/ && \
+    cd /tmp/cuspatial/python/cuspatial/ && \
     python setup.py build_ext --inplace && \
-    python setup.py install
+    python setup.py install && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR

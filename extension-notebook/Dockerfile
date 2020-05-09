@@ -27,7 +27,7 @@ RUN conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
     fix-permissions $conda_dir
 
 # Install facets which does not have a pip or conda package at the moment
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && cd /tmp && \
+RUN cd /tmp && \
     git clone https://github.com/PAIR-code/facets.git && \
     cd facets && \
     jupyter nbextension install facets-dist/ --sys-prefix && \

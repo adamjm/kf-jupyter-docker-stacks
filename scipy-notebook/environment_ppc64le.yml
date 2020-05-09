@@ -1,10 +1,11 @@
-name: wmlce
+name: base
 channels:
   - conda-forge
   - powerai
   - http://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda
   - defaults
 dependencies:
+  - pyodbc
   - _libgcc_mutex=0.1=main
   - absl-py=0.8.1=py37_0
   - asn1crypto=1.3.0=py37_0
@@ -203,4 +204,3 @@ dependencies:
   - zipp=2.2.0=py_0
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.3.7=h0b5b093_0
-prefix: /opt/anaconda/envs/wmlce
