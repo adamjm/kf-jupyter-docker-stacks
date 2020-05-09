@@ -32,9 +32,9 @@ ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip \
     PATH=$PATH:$SPARK_HOME/bin
 
 USER $NB_UID
-
+ARG POWERAI_LICENSE
 # Install Python 3 packages
-RUN conda install --quiet -y pyarrow \ 
+RUN export IBM_POWERAI_LICENSE_ACCEPT=${POWERAI_LICENSE} && conda install --quiet -y pyarrow \ 
     pyspark \
     imbalanced-learn \
     xgboost \
@@ -50,6 +50,8 @@ RUN conda install --quiet -y pyarrow \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
+
+RUN pip uninstall -y kale && pip install minio kubeflow-kale
 
 
 USER $NB_UID
