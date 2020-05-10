@@ -33,7 +33,8 @@ RUN mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/
 
 USER jovyan
 
-RUN mkdir /tmp/cugraph && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/cugraph && \
     git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
     cd /tmp/cugraph && \
     git checkout v0.11.0 && \
@@ -59,7 +60,8 @@ RUN mkdir /tmp/cudf && \
 ENV CUDF_HOME=/tmp/cudf/
 ARG CUDF_HOME=/tmp/cudf/
 
-RUN  mkdir /tmp/cuspatial && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/cuspatial && \
     git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
     cd /tmp/cuspatial && \
     git checkout v0.11.0 && \
