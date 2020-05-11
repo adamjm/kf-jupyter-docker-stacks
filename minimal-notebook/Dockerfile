@@ -1,6 +1,7 @@
 ARG REPO=adamjm32
 ARG ARCH
-ARG BASE_CONTAINER=$REPO/kf-base-notebook-$ARCH
+ARG VERSION
+ARG BASE_CONTAINER=$REPO/kf-base-notebook-$ARCH:$VERSION
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
