@@ -28,7 +28,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     scikit-optimize \
     bayesian-optimization && \
     conda clean --all -f -y && \
-    pip install pyhadoop ga tpot && \
+    pip install minio pyhadoop ga tpot && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
