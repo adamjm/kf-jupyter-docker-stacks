@@ -16,16 +16,17 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Use bash instead of sh
 SHELL ["/bin/bash", "-c"]
-ARG SOURCE_LIST=empty
-ARG TRUSTED_SOURCE=empty
+ARG CUSTOM_SOURCES=false
+ARG SOURCE_LIST=false
+ARG TRUSTED_SOURCE=false
 ARG HTTP_PROXY
 ARG HTTPS_PROXY
 ENV HTTP_PROXY=${HTTP_PROXY}
 ENV HTTPS_PROXY=${HTTPS_PROXY}
 
 #ARG NO_PROXY
-COPY config.sh /tmp/config.sh
-RUN /tmp/config.sh
+COPY config.sh /usr/bin/source-update
+RUN /usr/bin/source-update
 
 RUN apt-get update \
  && apt-get install -y \
