@@ -1,7 +1,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
-ARG BASE_CONTAINER=$REPO/kf-scipy-notebook
+ARG VERSION
+ARG BASE_CONTAINER=$REPO/kf-scipy-notebook-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"

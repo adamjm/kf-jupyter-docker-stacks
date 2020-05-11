@@ -1,7 +1,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
-ARG BASE_CONTAINER=$REPO/kf-pyspark-notebook
+ARG VERSION
+ARG ARCH
+ARG BASE_CONTAINER=$REPO/kf-pyspark-notebook-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"

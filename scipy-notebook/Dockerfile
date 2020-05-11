@@ -2,7 +2,8 @@
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
 ARG ARCH
-ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook-${ARCH}
+ARG VERSION
+ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 #FROM ibmcom/powerai:1.7.0-all-ubuntu18.04-py37
 LABEL maintainer="Adam Makarucha"
