@@ -18,7 +18,7 @@ RUN apt-get update && \
 USER $NB_UID
 
 # Install Python 3 packages
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     conda install --quiet -y  pyodbc \
     imbalanced-learn \
     xgboost \

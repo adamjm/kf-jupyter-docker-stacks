@@ -35,7 +35,7 @@ ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip \
 USER $NB_UID
 
 # Install Python 3 packages
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     conda install --quiet -y 'pyarrow' 'pyspark' && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
