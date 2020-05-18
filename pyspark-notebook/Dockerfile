@@ -36,7 +36,7 @@ USER $NB_UID
 
 # Install Python 3 packages
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-    conda install --quiet -y 'pyarrow' 'pyspark' && \
+    conda install --quiet -y 'pyarrow' && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
