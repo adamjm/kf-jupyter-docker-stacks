@@ -2,7 +2,8 @@
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
 ARG ARCH
-ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook-${ARCH}
+ARG VERSION
+ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 #FROM ibmcom/powerai:1.7.0-all-ubuntu18.04-py37
 LABEL maintainer="Adam Makarucha"
@@ -25,9 +26,8 @@ ENV PATH=/opt/anaconda/bin:$PATH
 
 SHELL ["/bin/bash", "-c"]
 # Install Python 3 packages
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
-    conda env update --prefix /opt/anaconda/envs/wmlce --file /tmp/environment_${ARCH}.yml  && \
+RUN export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
+    conda env update --file /tmp/environment_${ARCH}.yml  && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
@@ -35,7 +35,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
 
 # Import matplotlib the first time to build the font cache.
 ENV XDG_CACHE_HOME /home/root/.cache/
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && MPLBACKEND=Agg python -c "import matplotlib.pyplot" && \
+RUN MPLBACKEND=Agg python3 -c "import matplotlib.pyplot" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 

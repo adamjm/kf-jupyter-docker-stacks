@@ -1,9 +1,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
-ARG VERSION
-ARG ARCH
-ARG BASE_CONTAINER=$REPO/kf-scipy-notebook-${ARCH}:$VERSION
+ARG ARCH=amd64
+ARG BASE_CONTAINER=$REPO/kf-minimal-notebook-$ARCH
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"
@@ -15,7 +14,7 @@ ENV APACHE_SPARK_VERSION=2.4.5 \
 
 # ffmpeg for matplotlib anim & dvipng for latex labels
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-8-jre-headless ca-certificates-java && \
+    apt-get install -y --no-install-recommends openjdk-8-jre-headless ca-certificates-java unixodbc-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Using the preferred mirror to download the file
@@ -33,13 +32,26 @@ ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip \
     PATH=$PATH:$SPARK_HOME/bin
 
 USER $NB_UID
-
+ARG POWERAI_LICENSE
 # Install Python 3 packages
-RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-    conda install --quiet -y 'pyarrow' && \
+RUN export IBM_POWERAI_LICENSE_ACCEPT=${POWERAI_LICENSE} && conda install --quiet -y pyarrow \ 
+    pyspark \
+    imbalanced-learn \
+    xgboost \
+    lightgbm \ 
+    NLopt \
+    Hyperopt \
+    Optuna \ 
+    GPyOpt \
+    scikit-optimize \
+    bayesian-optimization && \
+    conda clean --all -f -y && \
+    pip install pyhadoop ga tpot kale && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
+
+RUN pip uninstall -y kale && pip install minio kubeflow-kale
 
 
 USER $NB_UID

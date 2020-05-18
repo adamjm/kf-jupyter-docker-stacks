@@ -1,6 +1,7 @@
 ARG REPO=adamjm32
 ARG ARCH
-ARG BASE_CONTAINER=$REPO/kf-base-notebook-$ARCH
+ARG VERSION
+ARG BASE_CONTAINER=$REPO/kf-base-notebook-$ARCH:$VERSION
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
@@ -31,6 +32,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     libprotobuf-java \
     protobuf-compiler \
     libprotoc-dev \
+    unixodbc-dev \ 
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install hadoop to enable the connection into HDFS

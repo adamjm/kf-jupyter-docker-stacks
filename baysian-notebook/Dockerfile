@@ -1,7 +1,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
-ARG BASE_CONTAINER=$REPO/kf-pyspark-notebook
+ARG VERSION
+ARG ARCH
+ARG BASE_CONTAINER=$REPO/kf-pyspark-notebook-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"
@@ -16,7 +18,7 @@ RUN apt-get update && \
 USER $NB_UID
 
 # Install Python 3 packages
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     conda install --quiet -y  pyodbc \
     imbalanced-learn \
     xgboost \
@@ -28,7 +30,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     scikit-optimize \
     bayesian-optimization && \
     conda clean --all -f -y && \
-    pip install pyhadoop ga tpot && \
+    pip install minio pyhadoop ga tpot && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
