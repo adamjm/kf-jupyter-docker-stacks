@@ -7,6 +7,7 @@ channels:
   - defaults
   - conda-forge
   - powerai
+  - nvidia
 dependencies:
   - cudatoolkit-dev=10.2.89
   - cmake>=3.12
@@ -30,10 +31,7 @@ dependencies:
   - double-conversion
   - rapidjson
   - flatbuffers
-  - gdal>=2.4.*
   - umap-learn>=0.3.9
-  - libcumlprims=0.12*
-  - ucx-py=0.12*
   - python-louvain
   - libcypher-parser
   - _libgcc_mutex=0.1=main
