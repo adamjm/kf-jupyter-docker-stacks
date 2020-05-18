@@ -2,6 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
 ARG VERSION
+ARG ARCH
 ARG BASE_CONTAINER=$REPO/kf-scipy-notebook-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 
