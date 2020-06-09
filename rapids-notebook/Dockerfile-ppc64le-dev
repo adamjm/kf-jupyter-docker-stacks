@@ -1,0 +1,129 @@
+ARG ARCH
+ARG VERSION
+ARG BASE_CONTAINER=adamjm32/kf-machine-learning-notebook-gpu-${ARCH}:$VERSION
+FROM $BASE_CONTAINER
+ARG ARCH=amd64
+
+LABEL maintainer="Adam Makarucha"
+
+USER root
+
+## Compile CUDF from source to enable it to work with existing dependancies
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update -y --fix-missing && \
+    apt upgrade -y && \
+    apt install -y \
+      git \
+      build-essential \
+      libboost-all-dev \
+      tzdata
+
+# Install conda
+# Enables "source activate conda
+
+ARG CC=gcc 
+ARG CXX=g++
+
+
+
+USER $NB_UID
+
+COPY cudf_dev_cuda10.2_${ARCH}.yml /tmp/cudf_environment.yml
+# Get CUDF
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    conda install --quiet --yes -n wmlce "python-graphviz=0.13.2" "streamz=0.5.2" && \
+    conda env update --prefix /opt/anaconda/envs/wmlce --file /tmp/cudf_environment.yml  --prune && \
+    conda clean --all -f -y && \
+    pip install cupy-cuda102 && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+COPY rmm_CMakeLists.patch /tmp/
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/rmm && \
+    git clone --recurse-submodules https://github.com/rapidsai/rmm.git /tmp/rmm && \
+    cd /tmp/rmm && \
+    git checkout branch-0.12 && \
+    patch CMakeLists.txt /tmp/rmm_CMakeLists.patch && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TESTS=OFF && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/rmm/python && \
+    python setup.py build_ext --inplace && \
+    python setup.py install && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cudf && \
+    git clone https://github.com/rapidsai/cudf.git /tmp/cudf && \
+    cd /tmp/cudf && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cudf/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cudf/python/nvstrings && \
+    python setup.py install && \
+    cd /tmp/cudf/python/cudf && \
+    python setup.py build_ext --inplace && \
+    python setup.py install && \
+    cd /tmp/cudf/python/dask_cudf && \
+    python setup.py install && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cuml && \
+    git clone https://github.com/rapidsai/cuml.git /tmp/cuml && \
+    cd /tmp/cuml && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cuml/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cuml/python/ && \
+    python setup.py build_ext --inplace && \
+    python setup.py install
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cugraph && \
+    git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
+    cd /tmp/cugraph && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cugraph/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cugraph/python/ && \
+    python setup.py build_ext --inplace && \
+    python setup.py install
+
+RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+    mkdir /tmp/cuspatial && \
+    git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
+    cd /tmp/cuspatial && \
+    git checkout branch-0.12 && \
+    git submodule update --init --remote --recursive && \
+    cd /tmp/cuspatial/cpp && \
+    mkdir build && \
+    cd build  && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 4 && \
+    make install && \
+    cd /tmp/cuspatial/python/ && \
+    python setup.py build_ext --inplace && \
+    python setup.py install

@@ -14,3 +14,4 @@ RUN conda install --yes \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
+RUN pip install kubeflow-kale

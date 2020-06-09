@@ -1,0 +1,26 @@
+ARG REPO=adamjm32
+ARG ARCH
+ARG VERSION
+ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook-${ARCH}:$VERSION
+FROM $BASE_CONTAINER
+ARG ARCH=amd64
+
+LABEL maintainer="Adam Makarucha"
+USER $NB_UID
+#Install python Machine learning libraries for processing large scale data processing (see https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/#/ for details )
+ARG IBM_POWERAI_LICENSE_ACCEPT=yes
+ENV IBM_POWERAI_LICENSE_ACCEPT=yes
+ARG PATH=/opt/anaconda/bin:$PATH
+ENV PATH=/opt/anaconda/bin:$PATH
+
+SHELL ["/bin/bash", "-c"]
+# Install Python 3 packages
+RUN export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
+    conda install horovod tensorflow-gpu powerai-release=1.6.2 && \
+    conda install -c powerai spacy && \
+    conda clean --all -f -y && \
+    pip install ludwig[full] && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+
