@@ -2,6 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 ARG REPO=adamjm32
 ARG VERSION
+ARG ARCH
 ARG BASE_CONTAINER=$REPO/kf-scipy-notebook-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 
@@ -34,8 +35,8 @@ ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip \
 USER $NB_UID
 
 # Install Python 3 packages
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    conda install --quiet -y 'pyarrow' 'pyspark' && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda install --quiet -y 'pyarrow' && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
