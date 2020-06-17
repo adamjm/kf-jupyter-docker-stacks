@@ -3,7 +3,6 @@ ARG VERSION
 ARG BASE_CONTAINER=adamjm32/kf-machine-learning-notebook-gpu-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 ARG ARCH=amd64
-
 LABEL maintainer="Adam Makarucha"
 
 USER root
@@ -17,7 +16,9 @@ RUN apt update -y --fix-missing && \
       git \
       build-essential \
       libboost-all-dev \
-      tzdata
+      tzdata \
+      libgdal-dev \
+      gdal-bin
 
 # Install conda
 # Enables "source activate conda
@@ -26,34 +27,42 @@ ARG CC=gcc
 ARG CXX=g++
 
 
+USER root
+
+RUN mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
+    tar xvf peg-0.1.18.tar.gz && cd peg-0.1.18/ && \
+    make && make install && \
+    mkdir /tmp/libcypher && cd /tmp/libcypher && wget https://github.com/cleishm/libcypher-parser/releases/download/v0.6.1/libcypher-parser-0.6.1.tar.gz && \
+    tar xvf libcypher-parser-0.6.1.tar.gz && cd libcypher-parser-0.6.1/ &&  ./configure && \
+    make clean check && \
+    make install
 
 USER $NB_UID
 
-COPY cudf_dev_cuda10.2_${ARCH}.yml /tmp/cudf_environment.yml
+COPY cudf_dev_cuda10.2_$ARCH.yml /tmp/cudf_environment.yml
 # Get CUDF
 
 ## Install Dependancies 
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
-    conda install --quiet --yes -n wmlce "python-graphviz=0.13.2" "streamz=0.5.2" && \
-    conda env update --prefix /opt/anaconda/envs/wmlce --file /tmp/cudf_environment.yml  --prune && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda install --quiet --yes -n base "python-graphviz=0.14" "streamz=0.5.2" networkx python-louvain && \
+    conda install --quiet --yes -n base -c numba "numba=0.50.0" && \
+    conda env update --file /tmp/cudf_environment.yml  --prune && \
     conda clean --all -f -y && \
-
-
+     pip install cupy && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
-
-## Build CUPY for cuda102 on ppc64le
-RUN pip install cupy-cuda102 
+    
 
 
-COPY rmm_CMakeLists.patch /tmp/
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+#COPY rmm_CMakeLists.patch /tmp/
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/rmm && \
     git clone --recurse-submodules https://github.com/rapidsai/rmm.git /tmp/rmm && \
     cd /tmp/rmm && \
-    git checkout branch-0.12 && \
-    patch CMakeLists.txt /tmp/rmm_CMakeLists.patch && \
+    git checkout branch-0.14 && \
+    git submodule update --init --remote --recursive && \
     mkdir build && \
     cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TESTS=OFF && \
@@ -65,17 +74,23 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda install --quiet --yes -n base "pyarrow=0.15.1" "arrow-cpp=0.15.1" && \
+    conda clean --all -f -y && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/cudf && \
     git clone https://github.com/rapidsai/cudf.git /tmp/cudf && \
     cd /tmp/cudf && \
-    git checkout branch-0.12 && \
+    git checkout branch-0.14 && \
     git submodule update --init --remote --recursive && \
     cd /tmp/cudf/cpp && \
     mkdir build && \
     cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON && \
-    make -j 4 && \
+    make -j 64 && \
     make install && \
     cd /tmp/cudf/python/nvstrings && \
     python setup.py install && \
@@ -87,50 +102,62 @@ RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/cuml && \
     git clone https://github.com/rapidsai/cuml.git /tmp/cuml && \
     cd /tmp/cuml && \
-    git checkout branch-0.12 && \
+    git checkout branch-0.14 && \
     git submodule update --init --remote --recursive && \
     cd /tmp/cuml/cpp && \
     mkdir build && \
     cd build  && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
-    make -j 4 && \
+    cmake .. -DBUILD_CUML_STD_COMMS=OFF -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DGPU_ARCHS=ALL -DPARALLEL_LEVEL=32 -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
+    make -j 64 && \
     make install && \
     cd /tmp/cuml/python/ && \
-    python setup.py build_ext --inplace && \
-    python setup.py install
+    python setup.py build_ext --inplace --singlegpu && \
+    python setup.py install --singlegpu
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+
+
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/cugraph && \
     git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
     cd /tmp/cugraph && \
-    git checkout branch-0.12 && \
+    git checkout branch-0.14 && \
     git submodule update --init --remote --recursive && \
     cd /tmp/cugraph/cpp && \
     mkdir build && \
     cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
-    make -j 4 && \
+    make -j 64 && \
     make install && \
     cd /tmp/cugraph/python/ && \
     python setup.py build_ext --inplace && \
-    python setup.py install
+    python setup.py install 
 
-RUN eval "$(conda shell.bash hook |sed 's/base/wmlce/g')" && \
+ENV CUDF_HOME=/tmp/cudf
+ARG CUDF_HOME=/tmp/cudf
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/cuspatial && \
     git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
     cd /tmp/cuspatial && \
-    git checkout branch-0.12 && \
+    git checkout branch-0.14 && \
     git submodule update --init --remote --recursive && \
     cd /tmp/cuspatial/cpp && \
     mkdir build && \
     cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
-    make -j 4 && \
+    make -j 64 && \
     make install && \
-    cd /tmp/cuspatial/python/ && \
+    cd /tmp/cuspatial/python/cuspatial && \
     python setup.py build_ext --inplace && \
     python setup.py install
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda install --quiet --yes -n base -c numba numba=0.50.0 && \
+    conda clean --all -f -y && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
