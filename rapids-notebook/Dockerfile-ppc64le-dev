@@ -25,7 +25,7 @@ RUN apt update -y --fix-missing && \
 
 ARG CC=gcc 
 ARG CXX=g++
-
+ARG NUM_PROCESSES=128
 
 USER root
 
@@ -46,13 +46,33 @@ COPY cudf_dev_cuda10.2_$ARCH.yml /tmp/cudf_environment.yml
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     conda install --quiet --yes -n base "python-graphviz=0.14" "streamz=0.5.2" networkx python-louvain && \
-    conda install --quiet --yes -n base -c numba "numba=0.50.0" && \
     conda env update --file /tmp/cudf_environment.yml  --prune && \
     conda clean --all -f -y && \
-     pip install cupy && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+USER root
+RUN apt-get update && apt-get install -y libedit-dev
+USER $NB_UID
+
+RUN git clone git://github.com/numba/numba.git /tmp/numba && \
+    git clone https://github.com/numba/llvmlite.git /tmp/llvmlite && \
+    cd /tmp/llvmlite && git checkout v0.32.1 && \
+    conda install -c numba llvmdev=8.0.0 && \
+    python setup.py build && python runtests.py && \
+    python setup.py install && \
+    cd /tmp/numba && git checkout 0.49.1 && \
+    python setup.py build_ext --inplace && \
+    python setup.py install && \
+    pip install . && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+RUN  pip install cupy && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
     
+## Update Numbda
 
 
 #COPY rmm_CMakeLists.patch /tmp/
@@ -66,7 +86,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir build && \
     cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TESTS=OFF && \
-    make -j 4 && \
+    make -j $NUM_PROCESSES && \
     make install && \
     cd /tmp/rmm/python && \
     python setup.py build_ext --inplace && \
@@ -90,7 +110,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir build && \
     cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON && \
-    make -j 64 && \
+    make -j $NUM_PROCESSES && \
     make install && \
     cd /tmp/cudf/python/nvstrings && \
     python setup.py install && \
@@ -112,7 +132,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir build && \
     cd build  && \
     cmake .. -DBUILD_CUML_STD_COMMS=OFF -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DGPU_ARCHS=ALL -DPARALLEL_LEVEL=32 -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
-    make -j 64 && \
+    make -j $NUM_PROCESSES && \
     make install && \
     cd /tmp/cuml/python/ && \
     python setup.py build_ext --inplace --singlegpu && \
@@ -131,7 +151,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir build && \
     cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
-    make -j 64 && \
+    make -j $NUM_PROCESSES && \
     make install && \
     cd /tmp/cugraph/python/ && \
     python setup.py build_ext --inplace && \
@@ -150,14 +170,14 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir build && \
     cd build  && \
     cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
-    make -j 64 && \
+    make -j $NUM_PROCESSES && \
     make install && \
     cd /tmp/cuspatial/python/cuspatial && \
     python setup.py build_ext --inplace && \
-    python setup.py install
-
-RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-    conda install --quiet --yes -n base -c numba numba=0.50.0 && \
-    conda clean --all -f -y && \
+    python setup.py install && \
     fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
+    fix-permissions $CONDA_DIR 
+
+USER root 
+RUN chown -r jovyan:jovyan /home/jovyan/.local
+USER $NB_UID
