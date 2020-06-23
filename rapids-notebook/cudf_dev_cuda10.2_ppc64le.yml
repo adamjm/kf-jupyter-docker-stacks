@@ -9,7 +9,7 @@ channels:
   - powerai
 dependencies:
   - cudatoolkit-dev=10.2.89
-  - cmake>=3.12
+  - cmake>=3.14
   - cmake_setuptools>=0.1.3
   - sphinx
   - sphinx_rtd_theme

@@ -26,6 +26,7 @@ RUN apt update -y --fix-missing && \
 ARG CC=gcc 
 ARG CXX=g++
 ARG NUM_PROCESSES=128
+ARG RAI_VERSION=branch-0.14
 
 USER root
 
@@ -81,12 +82,13 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/rmm && \
     git clone --recurse-submodules https://github.com/rapidsai/rmm.git /tmp/rmm && \
     cd /tmp/rmm && \
-    git checkout branch-0.14 && \
+    git checkout $RAI_VERSION && \
     git submodule update --init --remote --recursive && \
     mkdir build && \
     cd build  && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TESTS=OFF && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TESTS=ON && \
     make -j $NUM_PROCESSES && \
+    make test && \
     make install && \
     cd /tmp/rmm/python && \
     python setup.py build_ext --inplace && \
@@ -104,13 +106,14 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/cudf && \
     git clone https://github.com/rapidsai/cudf.git /tmp/cudf && \
     cd /tmp/cudf && \
-    git checkout branch-0.14 && \
+    git checkout $RAI_VERSION && \
     git submodule update --init --remote --recursive && \
     cd /tmp/cudf/cpp && \
     mkdir build && \
     cd build  && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBUILD_TESTS=ON && \
     make -j $NUM_PROCESSES && \
+    make test && \
     make install && \
     cd /tmp/cudf/python/nvstrings && \
     python setup.py install && \
@@ -179,5 +182,5 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     fix-permissions $CONDA_DIR 
 
 USER root 
-RUN chown -r jovyan:jovyan /home/jovyan/.local
+RUN mkdir /home/jovyan/.local  && chown -R $NB_UID:$NB_UID /home/jovyan/.local
 USER $NB_UID
