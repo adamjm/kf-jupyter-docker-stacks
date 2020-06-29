@@ -18,6 +18,7 @@ RUN apt update -y --fix-missing && \
       libboost-all-dev \
       tzdata \
       libgdal-dev \
+      libedit-dev \
       gdal-bin
 
 # Install conda
@@ -46,20 +47,16 @@ COPY cudf_dev_cuda10.2_$ARCH.yml /tmp/cudf_environment.yml
 ## Install Dependancies 
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-    conda install --quiet --yes -n base "python-graphviz=0.14" "streamz=0.5.2" networkx python-louvain && \
+    conda install --quiet --yes -n base "pyarrow=0.15.1" "arrow-cpp=0.15.1" "python-graphviz=0.14" "streamz=0.5.2" networkx python-louvain && \
+    conda install -c numba llvmdev=8.0.0 && \
     conda env update --file /tmp/cudf_environment.yml  --prune && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-USER root
-RUN apt-get update && apt-get install -y libedit-dev
-USER $NB_UID
-
 RUN git clone git://github.com/numba/numba.git /tmp/numba && \
     git clone https://github.com/numba/llvmlite.git /tmp/llvmlite && \
     cd /tmp/llvmlite && git checkout v0.32.1 && \
-    conda install -c numba llvmdev=8.0.0 && \
     python setup.py build && python runtests.py && \
     python setup.py install && \
     cd /tmp/numba && git checkout 0.49.1 && \
@@ -69,13 +66,10 @@ RUN git clone git://github.com/numba/numba.git /tmp/numba && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-RUN  pip install cupy && \
+RUN pip install cupy && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
     
-## Update Numbda
-
-
 #COPY rmm_CMakeLists.patch /tmp/
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
@@ -97,7 +91,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     fix-permissions $CONDA_DIR
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-    conda install --quiet --yes -n base "pyarrow=0.15.1" "arrow-cpp=0.15.1" && \
+
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
