@@ -186,15 +186,26 @@ RUN apt update -y && \
     apt install -y \
     maven 
 
+RUN mkdir /tmp/cppzmq && \
+    git clone https://github.com/zeromq/cppzmq.git /tmp/cppzmq && \
+    git checkout v4.5.0 && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make -j$PARALLEL_LEVEL && \
+    make install
+
+
 USER $NB_UID
 
 ARG JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el
 ENV JAVA_HOME=$JAVA_HOME
 
+
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-    conda install --yes -n base -c conda-forge gtest gmock cppzmq && \ 
+    conda install --yes -n base -c conda-forge gtest gmock && \ 
     #cppzmq pyhive && \
-    pip install JPype1 netifaces 
+    pip install JPype1 netifaces ‘pyhive[hive]’
 
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
