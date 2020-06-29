@@ -27,7 +27,7 @@ RUN apt update -y --fix-missing && \
 ARG CC=gcc 
 ARG CXX=g++
 ARG NUM_PROCESSES=128
-ARG RAI_VERSION=branch-0.14
+ARG RAI_VERSION=branch-0.13
 
 USER root
 
@@ -63,13 +63,10 @@ RUN git clone git://github.com/numba/numba.git /tmp/numba && \
     python setup.py build_ext --inplace && \
     python setup.py install && \
     pip install . && \
+    pip install cupy && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-RUN pip install cupy && \
-    fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
-    
 #COPY rmm_CMakeLists.patch /tmp/
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
