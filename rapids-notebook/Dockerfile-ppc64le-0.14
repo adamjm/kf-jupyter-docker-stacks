@@ -132,98 +132,94 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-COPY cuml_build.patch /tmp/cuml_build.patch
-COPY cuml_add_cudart.patch /tmp/cuml_add_cudart.patch
+COPY cuml_build_$RAI_VERSION.patch /tmp/cuml_build_$RAI_VERSION.patch
+COPY cuml_add_cudart_${RAI_VERSION}.patch /tmp/cuml_add_cudart_${RAI_VERSION}.patch
 COPY cuml_cpp.cmakelist.patch /tmp/cuml_cpp.cmakelist.patch
 COPY cuml_cpp.comms.std.src.patch /tmp/cuml_cpp.comms.std.src.patch
 COPY cuml_cpp.test.cmakelists.patch /tmp/cuml_cpp.test.cmakelists.patch
 COPY cuml_setup.patch /tmp/cuml_setup.patch
+COPY cuml_patches_${RAI_VERSION}.patch /tmp/cuml_patches_${RAI_VERSION}.patch
 
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    mkdir /tmp/cuml && \
-#    git clone https://github.com/rapidsai/cuml.git /tmp/cuml && \
-#    cd /tmp/cuml && \
-#    git checkout $RAI_VERSION && \
-#    git submodule update --init --remote --recursive && \
-#    git apply /tmp/cuml_add_cudart.patch && \
-#    git apply /tmp/cuml_build.patch && \
-#    git apply /tmp/cuml_cpp.cmakelist.patch && \
-#    git apply /tmp/cuml_cpp.comms.std.src.patch && \
-#    git apply /tmp/cuml_cpp.test.cmakelists.patch && \
-#    git apply /tmp/cuml_setup.patch && \
-#    ./build.sh libcuml -v --allgpuarch --singlegpu && \
-#    ./build.sh cuml --singlegpu 
-#
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    mkdir /tmp/cugraph && \
-#    git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
-#    cd /tmp/cugraph && \
-#    git checkout $RAI_VERSION && \
-#    git submodule update --init --remote --recursive && \
-#    ./build.sh libcugraph -v && \
-#    ./build.sh cugraph -v && \
-#    fix-permissions $HOME && \
-#    fix-permissions $CONDA_DIR
-#
-#ENV CUDF_HOME=/tmp/cudf
-#ARG CUDF_HOME=/tmp/cudf
-#
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    mkdir /tmp/cuspatial && \
-#    git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
-#    cd /tmp/cuspatial && \
-#    git checkout $RAI_VERSION && \
-#    git submodule update --init --remote --recursive && \
-#    ./build.sh libcuspatial -v && \
-#    ./build.sh cuspatial -v && \
-#    fix-permissions $HOME && \
-#    fix-permissions $CONDA_DIR 
-#
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    conda install --yes -n base -c conda-forge gtest gmock 
-#
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    mkdir /tmp/blazingdb-toolchain && \
-#    git clone https://github.com/BlazingDB/blazingdb-toolchain.git /tmp/blazingdb-toolchain && \
-#    cd /tmp/blazingdb-toolchain && \
-#    git checkout $RAI_VERSION && \
-#    mkdir build-aws && \
-#    mkdir build-gcp && \
-#    cd build-gcp && \
-#    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TARGET=gcp-cpp && \
-#    make -j$PARALLEL_LEVEL && \
-#    make install && \
-#    cd ../build-aws && \
-#    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TARGET=aws-cpp && \
-#    make -j$PARALLEL_LEVEL && \
-#    make install 
-#
-#COPY bdb-build.patch /tmp/bdb-build.patch
-#
-#RUN mkdir -p /opt/anaconda/include/bsql-rapids-thirdparty/ && \
-#   DIR_BSQL="bsql-rapids-thirdparty" && \
-#git clone -b branch-0.12 --recurse-submodules https://github.com/rapidsai/cudf.git /tmp/cudf-0.12 && \
-#cp -rf /tmp/cudf-0.12/thirdparty/cub /opt/anaconda/include/$DIR_BSQL/cub && \
-#rm -rf /tmp/cudf-0.12/thirdparty/libcudacxx/libcxx/test/ && \ 
-#cp -rf /tmp/cudf-0.12/thirdparty/libcudacxx /opt/anaconda/include/$DIR_BSQL/libcudacxx
-#
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    mkdir /tmp/blazingsql && \
-#    git clone https://github.com/BlazingDB/blazingsql.git /tmp/blazingsql && \
-#    cd /tmp/blazingsql && \
-#    git checkout $RAI_VERSION && \
-#    git submodule update --init --remote --recursive && \
-#    git apply /tmp/bdb-build.patch && \
-#    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el && \
-#    ./build.sh
-#
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    conda remove --yes -n base gtest gmock && \ 
-#    fix-permissions $HOME && \
-#    fix-permissions $CONDA_DIR
-#
-#USER root 
-#RUN mkdir /home/jovyan/.local  && chown -R $NB_UID:$NB_UID /home/jovyan/.local
-#USER $NB_UID
-#
-#
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/cuml && \
+    git clone https://github.com/rapidsai/cuml.git /tmp/cuml && \
+    cd /tmp/cuml && \
+    git checkout $RAI_VERSION && \
+    git submodule update --init --remote --recursive && \
+    git apply /tmp/cuml_patches_${RAI_VERSION}.patch && \
+    ./build.sh libcuml -v --singlegpu --allgpuarch && \
+    ./build.sh cuml --singlegpu 
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/cugraph && \
+    git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
+    cd /tmp/cugraph && \
+    git checkout $RAI_VERSION && \
+    git submodule update --init --remote --recursive && \
+    ./build.sh libcugraph -v && \
+    ./build.sh cugraph -v && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+ENV CUDF_HOME=/tmp/cudf
+ARG CUDF_HOME=/tmp/cudf
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/cuspatial && \
+    git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
+    cd /tmp/cuspatial && \
+    git checkout $RAI_VERSION && \
+    git submodule update --init --remote --recursive && \
+    ./build.sh libcuspatial -v && \
+    ./build.sh cuspatial -v && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR 
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda install --yes -n base -c conda-forge gtest gmock 
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/blazingdb-toolchain && \
+    git clone https://github.com/BlazingDB/blazingdb-toolchain.git /tmp/blazingdb-toolchain && \
+    cd /tmp/blazingdb-toolchain && \
+    git checkout $RAI_VERSION && \
+    mkdir build-aws && \
+    mkdir build-gcp && \
+    cd build-gcp && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TARGET=gcp-cpp && \
+    make -j$PARALLEL_LEVEL && \
+    make install && \
+    cd ../build-aws && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TARGET=aws-cpp && \
+    make -j$PARALLEL_LEVEL && \
+    make install 
+
+COPY bdb-build.patch /tmp/bdb-build.patch
+
+RUN mkdir -p /opt/anaconda/include/bsql-rapids-thirdparty/ && \
+   DIR_BSQL="bsql-rapids-thirdparty" && \
+git clone -b branch-0.12 --recurse-submodules https://github.com/rapidsai/cudf.git /tmp/cudf-0.12 && \
+cp -rf /tmp/cudf-0.12/thirdparty/cub /opt/anaconda/include/$DIR_BSQL/cub && \
+rm -rf /tmp/cudf-0.12/thirdparty/libcudacxx/libcxx/test/ && \ 
+cp -rf /tmp/cudf-0.12/thirdparty/libcudacxx /opt/anaconda/include/$DIR_BSQL/libcudacxx
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/blazingsql && \
+    git clone https://github.com/BlazingDB/blazingsql.git /tmp/blazingsql && \
+    cd /tmp/blazingsql && \
+    git checkout $RAI_VERSION && \
+    git submodule update --init --remote --recursive && \
+    git apply /tmp/bdb-build.patch && \
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el && \
+    ./build.sh
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda remove --yes -n base gtest gmock && \ 
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+USER root 
+RUN mkdir /home/jovyan/.local  && chown -R $NB_UID:$NB_UID /home/jovyan/.local
+USER $NB_UID
+
+
