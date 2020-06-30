@@ -11,6 +11,7 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -y --fix-missing && \
+    apt-get remove -y protobuf-compiler libprotoc-dev libprotobuf-dev
     apt upgrade -y && \
     apt install -y \
       git \
@@ -19,23 +20,37 @@ RUN apt update -y --fix-missing && \
       tzdata \
       libgdal-dev \
       libedit-dev \
-      gdal-bin
+      gdal-bin \
+      maven
 
 # Install conda
 # Enables "source activate conda
 
+
+
 ARG CC=gcc 
 ARG CXX=g++
 ARG PARALLEL_LEVEL=128
-ARG RAI_VERSION=branch-0.13
+ARG RAI_VERSION=v0.13.0
 ARG NUMBA_VERSION=0.48.0
 ARG LLVMLITE_VERSION=v0.31.0
 ARG LLVMDEV_VERSION=8.0.0
 ARG CUPY_VERSION=7.6.0
+ARG JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el
+ENV JAVA_HOME=$JAVA_HOME
+
 
 USER root
 
-RUN mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
+RUN mkdir /tmp/cppzmq && \
+    git clone https://github.com/zeromq/cppzmq.git /tmp/cppzmq && \
+    cd /tmp/cppzmq && git checkout v4.5.0 && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make -j$PARALLEL_LEVEL && \
+    make install && \
+    mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
     tar xvf peg-0.1.18.tar.gz && cd peg-0.1.18/ && \
     make && make install && \
     mkdir /tmp/libcypher && cd /tmp/libcypher && wget https://github.com/cleishm/libcypher-parser/releases/download/v0.6.1/libcypher-parser-0.6.1.tar.gz && \
@@ -68,6 +83,7 @@ RUN git clone git://github.com/numba/numba.git /tmp/numba && \
     python setup.py install && \
     pip install . && \
     pip install cupy==$CUPY_VERSION && \
+    pip install JPype1 netifaces pyhive protobuf==3.8.0 && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
@@ -138,75 +154,60 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     git apply /tmp/cuml_cpp.test.cmakelists.patch && \
     git apply /tmp/cuml_setup.patch && \
     ./build.sh libcuml -v --allgpuarch --singlegpu && \
-    #CUDA_SO_PATH=`find $PREFIX -name libcuda.so | grep 'stub' |cut -d ' ' -f 1` && \
-    #ln -s $CUDA_SO_PATH $PREFIX/lib/libcuda.so && \
-    #export CUDA_HOME=$PREFIX && \
-    #mkdir -p $PREFIX/bin/ && \
     ./build.sh cuml --singlegpu 
-    #rm -v $PREFIX/lib/libcuda.so 
-
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    mkdir /tmp/cugraph && \
-#    git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
-#    cd /tmp/cugraph && \
-#    git checkout $RAI_VERSION && \
-#    git submodule update --init --remote --recursive && \
-#    mkdir build && \
-#    cd build  && \
-#    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
-#    make -j $NUM_PROCESSES && \
-#    make install && \
-#    cd /tmp/cugraph/python/ && \
-#    python setup.py build_ext --inplace && \
-#    python setup.py install 
-#
-#ENV CUDF_HOME=/tmp/cudf
-#ARG CUDF_HOME=/tmp/cudf
-#
-#RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-#    mkdir /tmp/cuspatial && \
-#    git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
-#    cd /tmp/cuspatial && \
-#    git checkout $RAI_VERSION && \
-#    git submodule update --init --remote --recursive && \
-#    cd /tmp/cuspatial/cpp && \
-#    mkdir build && \
-#    cd build  && \
-#    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX11_ABI=ON -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so && \
-#    make -j $NUM_PROCESSES && \
-#    make install && \
-#    cd /tmp/cuspatial/python/cuspatial && \
-#    python setup.py build_ext --inplace && \
-#    python setup.py install && \
-#    fix-permissions $HOME && \
-#    fix-permissions $CONDA_DIR 
-
-USER root
-RUN apt update -y && \
-    apt install -y \
-    maven 
-
-RUN mkdir /tmp/cppzmq && \
-    git clone https://github.com/zeromq/cppzmq.git /tmp/cppzmq && \
-    git checkout v4.5.0 && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make -j$PARALLEL_LEVEL && \
-    make install
-
-
-USER $NB_UID
-
-ARG JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el
-ENV JAVA_HOME=$JAVA_HOME
-
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-    conda install --yes -n base -c conda-forge gtest gmock && \ 
-    #cppzmq pyhive && \
-    pip install JPype1 netifaces ‘pyhive[hive]’
+    mkdir /tmp/cugraph && \
+    git clone https://github.com/rapidsai/cugraph.git /tmp/cugraph && \
+    cd /tmp/cugraph && \
+    git checkout $RAI_VERSION && \
+    git submodule update --init --remote --recursive && \
+    ./build.sh libcugraph -v && \
+    ./build.sh cugraph -v && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
+ENV CUDF_HOME=/tmp/cudf
+ARG CUDF_HOME=/tmp/cudf
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/cuspatial && \
+    git clone https://github.com/rapidsai/cuspatial.git /tmp/cuspatial && \
+    cd /tmp/cuspatial && \
+    git checkout $RAI_VERSION && \
+    git submodule update --init --remote --recursive && \
+    ./build.sh libcuspatial -v && \
+    ./build.sh cuspatial -v && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR 
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda install --yes -n base -c conda-forge gtest gmock 
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    mkdir /tmp/blazingdb-toolchain && \
+    git clone https://github.com/BlazingDB/blazingdb-toolchain.git /tmp/blazingdb-toolchain && \
+    cd /tmp/blazingdb-toolchain && \
+    git checkout $RAI_VERSION && \
+    mkdir build-aws && \
+    mkdir build-gcp && \
+    cd build-gcp && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TARGET=gcp-cpp && \
+    make -j$PARALLEL_LEVEL && \
+    make install && \
+    cd ../build-aws && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DBUILD_TARGET=aws-cpp && \
+    make -j$PARALLEL_LEVEL && \
+    make install 
+
+COPY bdb-build.patch /tmp/bdb-build.patch
+
+RUN mkdir -p /opt/anaconda/include/bsql-rapids-thirdparty/ && \
+   DIR_BSQL="bsql-rapids-thirdparty" && \
+git clone -b branch-0.12 --recurse-submodules https://github.com/rapidsai/cudf.git /tmp/cudf-0.12 && \
+cp -rf /tmp/cudf-0.12/thirdparty/cub /opt/anaconda/include/$DIR_BSQL/cub && \
+rm -rf /tmp/cudf-0.12/thirdparty/libcudacxx/libcxx/test/ && \ 
+cp -rf /tmp/cudf-0.12/thirdparty/libcudacxx /opt/anaconda/include/$DIR_BSQL/libcudacxx
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/blazingsql && \
@@ -214,8 +215,17 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     cd /tmp/blazingsql && \
     git checkout $RAI_VERSION && \
     git submodule update --init --remote --recursive && \
+    git apply /tmp/bdb-build.patch && \
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el && \
     ./build.sh
+
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda remove --yes -n base gtest gmock && \ 
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
 USER root 
 RUN mkdir /home/jovyan/.local  && chown -R $NB_UID:$NB_UID /home/jovyan/.local
 USER $NB_UID
+
+

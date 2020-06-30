@@ -1,0 +1,13 @@
+diff --git a/build.sh b/build.sh
+index b53cb63..2faf1ce 100755
+--- a/build.sh
++++ b/build.sh
+@@ -59,7 +59,7 @@ PARALLEL_LEVEL=${PARALLEL_LEVEL:=""}
+ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PREFIX/lib
+ export CXXFLAGS="-L$INSTALL_PREFIX/lib"
+ export CFLAGS=$CXXFLAGS
+-export CUDACXX=/usr/local/cuda/bin/nvcc
++export CUDACXX=${CONDA_PREFIX}/bin/nvcc
+ 
+ function hasArg {
+     (( ${NUMARGS} != 0 )) && (echo " ${ARGS} " | grep -q " $1 ")
