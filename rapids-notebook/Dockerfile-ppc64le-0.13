@@ -11,7 +11,7 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -y --fix-missing && \
-    apt-get remove -y protobuf-compiler libprotoc-dev libprotobuf-dev
+    apt-get remove -y protobuf-compiler libprotoc-dev libprotobuf-dev && \
     apt upgrade -y && \
     apt install -y \
       git \
@@ -27,15 +27,9 @@ RUN apt update -y --fix-missing && \
 # Enables "source activate conda
 
 
-
-ARG CC=gcc 
-ARG CXX=g++
+ARG CC=/usr/bin/gcc 
+ARG CXX=/usr/bin/g++
 ARG PARALLEL_LEVEL=128
-ARG RAI_VERSION=v0.13.0
-ARG NUMBA_VERSION=0.48.0
-ARG LLVMLITE_VERSION=v0.31.0
-ARG LLVMDEV_VERSION=8.0.0
-ARG CUPY_VERSION=7.6.0
 ARG JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el
 ENV JAVA_HOME=$JAVA_HOME
 
@@ -52,10 +46,10 @@ RUN mkdir /tmp/cppzmq && \
     make install && \
     mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
     tar xvf peg-0.1.18.tar.gz && cd peg-0.1.18/ && \
-    make && make install && \
+    make -j$PARALLEL_LEVEL && make install && \
     mkdir /tmp/libcypher && cd /tmp/libcypher && wget https://github.com/cleishm/libcypher-parser/releases/download/v0.6.1/libcypher-parser-0.6.1.tar.gz && \
     tar xvf libcypher-parser-0.6.1.tar.gz && cd libcypher-parser-0.6.1/ &&  ./configure && \
-    make clean check && \
+    make -j$PARALLEL_LEVEL clean check && \
     make install
 
 USER $NB_UID
@@ -67,13 +61,19 @@ COPY cudf_dev_cuda10.2_$ARCH.yml /tmp/cudf_environment.yml
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     conda install --quiet --yes -n base "pyarrow=0.15.1" "arrow-cpp=0.15.1" "python-graphviz=0.14" "streamz=0.5.2" networkx python-louvain && \
-    conda install -c numba llvmdev=$LLVMDEV_VERSION && \
     conda env update --file /tmp/cudf_environment.yml  --prune && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-RUN git clone git://github.com/numba/numba.git /tmp/numba && \
+ARG RAI_VERSION=v0.13.0
+ARG NUMBA_VERSION=0.48.0
+ARG LLVMLITE_VERSION=v0.31.0
+ARG LLVMDEV_VERSION=8.0.0
+ARG CUPY_VERSION=7.6.0
+
+RUN conda install -c numba llvmdev=$LLVMDEV_VERSION && \
+    git clone git://github.com/numba/numba.git /tmp/numba && \
     git clone https://github.com/numba/llvmlite.git /tmp/llvmlite && \
     cd /tmp/llvmlite && git checkout $LLVMLITE_VERSION && \
     python setup.py build && python runtests.py && \
@@ -87,8 +87,7 @@ RUN git clone git://github.com/numba/numba.git /tmp/numba && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-ARG CC=/usr/bin/gcc 
-ARG CXX=/usr/bin/g++
+
 
 COPY rmm_cmakeLists_test.patch /tmp/
 COPY rmm_build.patch /tmp/
