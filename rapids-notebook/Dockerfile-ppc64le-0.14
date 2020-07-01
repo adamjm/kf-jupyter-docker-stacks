@@ -198,10 +198,26 @@ COPY bdb-build.patch /tmp/bdb-build.patch
 
 RUN mkdir -p /opt/anaconda/include/bsql-rapids-thirdparty/ && \
    DIR_BSQL="bsql-rapids-thirdparty" && \
-git clone -b branch-0.12 --recurse-submodules https://github.com/rapidsai/cudf.git /tmp/cudf-0.12 && \
-cp -rf /tmp/cudf-0.12/thirdparty/cub /opt/anaconda/include/$DIR_BSQL/cub && \
-rm -rf /tmp/cudf-0.12/thirdparty/libcudacxx/libcxx/test/ && \ 
-cp -rf /tmp/cudf-0.12/thirdparty/libcudacxx /opt/anaconda/include/$DIR_BSQL/libcudacxx
+cp -rf /tmp/cudf/thirdparty/cub /opt/anaconda/include/$DIR_BSQL/cub && \
+rm -rf /tmp/cudf/thirdparty/libcudacxx/libcxx/test/ && \ 
+cp -rf /tmp/cudf/thirdparty/libcudacxx /opt/anaconda/include/$DIR_BSQL/libcudacxx
+
+USER root
+RUN git clone https://github.com/gabime/spdlog.git /tmp/spdlog && \
+    cd /tmp/spdlog && mkdir build && cd build && \
+    cmake .. && make -j && make install
+USER $NB_UID
+
+RUN git clone https://github.com/dropbox/PyHive.git /tmp/PyHive && \ 
+    git clone https://github.com/apache/thrift.git /tmp/thrift && \
+    cd /tmp/thrift/lib/py/ && pip install . && \
+    cd /tmp/PyHive && pip install . 
+
+RUN git clone https://github.com/dask/dask.git /tmp/dask && \
+   cd /tmp/dask && git checkout 2.16.0 && \
+   python -m pip install .
+
+COPY blazingsql_patches_${RAI_VERSION}.patch /tmp/blazingsql_patches_${RAI_VERSION}.patch
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/blazingsql && \
@@ -209,15 +225,12 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     cd /tmp/blazingsql && \
     git checkout $RAI_VERSION && \
     git submodule update --init --remote --recursive && \
-    git apply /tmp/bdb-build.patch && \
+    git apply /tmp/blazingsql_patches_${RAI_VERSION}.patch && \
     export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el && \
     ./build.sh
 
-RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
-    conda remove --yes -n base gtest gmock && \ 
-    fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
-
+ENV CONDA_PREFIX=/opt/anaconda
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el 
 USER root 
 RUN mkdir /home/jovyan/.local  && chown -R $NB_UID:$NB_UID /home/jovyan/.local
 USER $NB_UID
