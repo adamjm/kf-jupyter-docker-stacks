@@ -124,6 +124,7 @@ RUN /opt/anaconda/bin/conda config --append channels conda-forge && \
 RUN conda install --quiet --yes -n base \
     'notebook=6.0.3' \
     'jupyterhub=1.1.0' \
+    'zeromq=4.3.2' \
     'jupyterlab=2.0.1' && \
     conda clean --all -f -y && \
     npm cache clean --force && \

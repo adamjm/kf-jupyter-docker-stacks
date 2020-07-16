@@ -24,17 +24,18 @@ RUN conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
     npm cache clean --force && \
     rm -rf /home/root/.cache/yarn && \
     rm -rf /home/root/.node-gyp && \
-    fix-permissions $home && \
-    fix-permissions $conda_dir
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
 # Install facets which does not have a pip or conda package at the moment
 RUN cd /tmp && \
     git clone https://github.com/PAIR-code/facets.git && \
     cd facets && \
     jupyter nbextension install facets-dist/ --sys-prefix && \
+    jupyter lab build && \
     cd && \
     rm -rf /tmp/facets && \
-    fix-permissions $home && \
-    fix-permissions $conda_dir
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
 USER $NB_UID

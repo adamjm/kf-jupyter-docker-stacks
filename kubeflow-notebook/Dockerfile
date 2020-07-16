@@ -14,9 +14,9 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.15.11/
 USER $NB_UID
 # Install KF python libs  (using pip as these are not in the conda repos)
 RUN pip install kfp minio \
-    kubeflow-fairing && \
-    fix-permissions $home && \
-    fix-permissions $conda_dir
+    kubeflow-fairing kubeflow-kale==0.4.0  && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
 #RUN git clone https://github.com/kubeflow-kale/jupyterlab-kubeflow-kale.git /jupyterlab-kubeflow-kale && \
 #    cd /jupyterlab-kubeflow-kale && \
