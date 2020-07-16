@@ -16,12 +16,19 @@ USER $NB_UID
 RUN conda install -n base "jupyterlab<2.0.0" && \
     conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
     jupyter nbextension enable --py widgetsnbextension --sys-prefix && \
-    cd /kale/labextension && jlpm install && jlpm run build && jlpm labextension install . && \
-    cd /kale/backend/ && pip install -e . && \
-    conda clean --all -f -y && \
-    npm cache clean --force && \
+    pip install kubeflow-kale && \
+    jupyter labextension install kubeflow-kale-labextension && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
+
+   
+
+#cd /kale/labextension && jlpm install && jlpm run build && jlpm labextension install . && \
+#    cd /kale/backend/ && pip install -e . && \
+#    conda clean --all -f -y && \
+#    npm cache clean --force && \
+#    fix-permissions $HOME && \
+#    fix-permissions $CONDA_DIR
 
 
 #RUN eval "$(conda shell.bash hook |sed 's/base/kale/g')" && \
