@@ -6,6 +6,7 @@ FROM $BASE_CONTAINER
 ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
 ARG HADOOP_URL
+ARG ARCH_UBUNTU
 USER root
 
 RUN apt-get update && apt-get install -yq --no-install-recommends \
@@ -38,7 +39,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 # Install hadoop to enable the connection into HDFS
 RUN mkdir /hadoop && wget -c ${HADOOP_URL} -O - | tar -xz -C /hadoop
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH} \
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${ARCH_UBUNTU} \
     HADOOP_HOME=/opt/hadoop/ \
     ARROW_LIBHDFS_DIR=${HADOOP_HOME}/lib/native
 

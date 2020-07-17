@@ -15,8 +15,12 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 if [ "$ARCH" == "x86_64" ]
 then
     ARCH=amd64
+    ARCH_UBUNTU=amd64
+elif [ "$ARCH" == "ppc64le" ]
+then
+    ARCH_UBUNTU=ppc64el
 fi
-DIR_LIST=(base-notebook minimal-notebook extension-notebook kubeflow-notebook scipy-notebook machine-learning-notebook rapids-notebook pyspark-notebook baysian-notebook)
+DIR_LIST=(base-notebook minimal-notebook extension-notebook kubeflow-notebook machine-learning-notebook rapids-notebook pyspark-notebook baysian-notebook)
 
 for dir in "${DIR_LIST[@]}"
 do
@@ -25,15 +29,15 @@ do
         if [ "$dir" == "machine-learning-notebook" ]
         then
             echo $ARCH
-            $SUDO docker build --rm -f "$dir/Dockerfile-gpu" -t $REPO/kf-$dir-gpu-$ARCH:$version --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL --build-arg VERSION=$version "$dir"
-            $SUDO docker build --rm -f "$dir/Dockerfile-cpu" -t $REPO/kf-$dir-cpu-$ARCH:$version --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL --build-arg VERSION=$version "$dir"
+            $SUDO docker build --rm -f "$dir/Dockerfile-gpu" -t $REPO/kf-$dir-gpu-$ARCH:$version --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL --build-arg VERSION=$version --build-arg ARCH_UBUNTU=$ARCH_UBUNTU "$dir"
+            $SUDO docker build --rm -f "$dir/Dockerfile-cpu" -t $REPO/kf-$dir-cpu-$ARCH:$version --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL --build-arg VERSION=$version --build-arg ARCH_UBUNTU=$ARCH_UBUNTU "$dir"
         elif [ "$dir" == "rapids-notebook" ]
         then
             echo $ARCH
-            $SUDO docker build --rm -f "$dir/Dockerfile-$ARCH" -t $REPO/kf-$dir-$ARCH:$version --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL --build-arg VERSION=$version "$dir"
+            $SUDO docker build --rm -f "$dir/Dockerfile-$ARCH" -t $REPO/kf-$dir-$ARCH:$version --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL --build-arg VERSION=$version --build-arg ARCH_UBUNTU=$ARCH_UBUNTU "$dir"
 	else
             echo $ARCH
-           $SUDO docker build --rm -f "$dir/Dockerfile" -t $REPO/kf-$dir-$ARCH:$version --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE  --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL --build-arg VERSION=$version "$dir"
+           $SUDO docker build --rm -f "$dir/Dockerfile" -t $REPO/kf-$dir-$ARCH:$version --build-arg REPO=$REPO --build-arg ARCH=$ARCH --build-arg SOURCE_LIST=$SOURCE_LIST --build-arg TRUSTED_SOURCE=$TRUSTED_SOURCE  --build-arg HTTP_PROXY=$PROXY --build-arg HTTPS_PROXY=$PROXY --build-arg HADOOP_URL=$HADOOP_URL --build-arg VERSION=$version --build-arg ARCH_UBUNTU=$ARCH_UBUNTU "$dir"
         fi
     elif [ "$STAGE" == "push" ]
     then

@@ -122,18 +122,18 @@ RUN /opt/anaconda/bin/conda config --append channels conda-forge && \
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
 RUN conda install --quiet --yes -n base \
-    'notebook=6.0.3' \
-    'jupyterhub=1.1.0' \
+    'notebook>=6.0.3' \
     'zeromq>=4.3.2' \
-    'jupyterlab=2.0.1' && \
+    'ipykernel>=5.1.4' \
+    'jupyterlab>=2.1.5' && \
     conda clean --all -f -y && \
     npm cache clean --force && \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
-RUN conda install --quiet --yes -n base 'ipykernel=5.1.4=py37h39e3cac_0' && \
-    fix-permissions $CONDA_DIR && \
-    fix-permissions /home/$NB_USER
+#RUN conda install --quiet --yes -n base 'ipykernel=5.1.4=py37h39e3cac_0' && \
+#    fix-permissions $CONDA_DIR && \
+#    fix-permissions /home/$NB_USER
 
 EXPOSE 8888
 
