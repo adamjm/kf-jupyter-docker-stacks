@@ -24,7 +24,7 @@ RUN conda install --yes \
     sympy \
     vincent \
     widgetsnbextension \
-    xlrd &&
+    xlrd && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
