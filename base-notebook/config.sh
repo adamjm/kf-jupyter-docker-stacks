@@ -1,7 +1,16 @@
 #!/bin/bash
+ARCH=`uname -m`
+
 
 if [ "$CUSTOM_SOURCES" == "true" ]
 then
+if [ "$ARCH" == "x86_64" ]
+then
+	SOURCE_LIST=$SOURCE_LIST_AMD
+elif [ "$ARCH" == "ppc64le" ]
+then
+	SOURCE_LIST=$SOURCE_LIST_PPC
+fi
 if [ "$TRUSTED_SOURCE" == "true" ]
 then
 	echo "Creating sources.list"
