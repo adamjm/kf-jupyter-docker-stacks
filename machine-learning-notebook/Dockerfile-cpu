@@ -10,6 +10,21 @@ USER $NB_UID
 #Install python Machine learning libraries for processing large scale data processing (see https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/#/ for details )
 RUN conda install --yes \
     powerai-cpu && \
+    conda install --yes \
+    beautifulsoup4 \
+    bottleneck \
+    ipywidgets \
+    ipympl \ 
+    pandas=0.25.* \
+    patsy \
+    pytables \
+    seaborn \
+    sqlalchemy \
+    statsmodels \
+    sympy \
+    vincent \
+    widgetsnbextension \
+    xlrd &&
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
