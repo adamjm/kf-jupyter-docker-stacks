@@ -9,7 +9,7 @@ LABEL maintainer="Adam Makarucha"
 
 USER $NB_UID
 # Install Python 3 packages
-RUN conda install -n base -c conda-forge nodejs=10.13 widgetsnbextension && \
+RUN conda install -n base -c conda-forge nodejs>=10.14.2 widgetsnbextension && \
     conda clean --all -f -y && \
     # Activate ipywidgets extension in the environment that runs the notebook server
     jupyter nbextension enable --py widgetsnbextension --sys-prefix && \
