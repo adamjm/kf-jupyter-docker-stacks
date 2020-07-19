@@ -8,7 +8,10 @@ ARG ARCH=amd64
 LABEL maintainer="Adam Makarucha"
 USER $NB_UID
 #Install python Machine learning libraries for processing large scale data processing (see https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/#/ for details )
-RUN conda install --yes \
+ARG IBM_POWERAI_LICENSE_ACCEPT=yes
+ENV IBM_POWERAI_LICENSE_ACCEPT=yes
+RUN export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
+    conda install --yes \
     powerai-cpu=1.7.0 && \
     conda install --yes \
     beautifulsoup4 \
