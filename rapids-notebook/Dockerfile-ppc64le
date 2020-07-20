@@ -21,6 +21,7 @@ RUN apt update -y --fix-missing && \
       libgdal-dev \
       libedit-dev \
       gdal-bin \
+      libzmq3-dev \
       maven
 
 # Install conda
@@ -36,15 +37,15 @@ ENV JAVA_HOME=$JAVA_HOME
 
 USER root
 
-RUN mkdir /tmp/cppzmq && \
-    git clone https://github.com/zeromq/cppzmq.git /tmp/cppzmq && \
-    cd /tmp/cppzmq && git checkout v4.5.0 && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make -j$PARALLEL_LEVEL && \
-    make install && \
-    mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
+#RUN mkdir /tmp/cppzmq && \
+#    git clone https://github.com/zeromq/cppzmq.git /tmp/cppzmq && \
+#    cd /tmp/cppzmq && git checkout v4.5.0 && \
+#    mkdir build && \
+#    cd build && \
+#    cmake .. && \
+#    make -j$PARALLEL_LEVEL && \
+#    make install && \
+RUN mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
     tar xvf peg-0.1.18.tar.gz && cd peg-0.1.18/ && \
     make -j$PARALLEL_LEVEL && make install && \
     mkdir /tmp/libcypher && cd /tmp/libcypher && wget https://github.com/cleishm/libcypher-parser/releases/download/v0.6.1/libcypher-parser-0.6.1.tar.gz && \
@@ -90,8 +91,8 @@ RUN conda install -c numba llvmdev=$LLVMDEV_VERSION && \
 
 
 
-COPY rmm_cmaketests_${RAI_VERSION}.patch /tmp/
-COPY rmm_build_${RAI_VERSION}.patch /tmp/
+COPY patches/rmm_cmaketests_${RAI_VERSION}.patch /tmp/
+COPY patches/rmm_build_${RAI_VERSION}.patch /tmp/
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/rmm && \
@@ -108,11 +109,11 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-COPY cudf_arrow_version_update.patch /tmp/cudf_arrow_version_update.patch
-COPY cudf_build.patch /tmp/cudf_build.patch
-COPY cudf_cmake.patch /tmp/cudf_cmake.patch
-COPY cudf_cfloat.patch /tmp/cudf_cfloat.patch
-COPY cudf_setup_cmake.patch /tmp/cudf_setup_cmake.patch
+COPY patches/cudf_arrow_version_update.patch /tmp/cudf_arrow_version_update.patch
+COPY patches/cudf_build.patch /tmp/cudf_build.patch
+COPY patches/cudf_cmake.patch /tmp/cudf_cmake.patch
+COPY patches/cudf_cfloat.patch /tmp/cudf_cfloat.patch
+COPY patches/cudf_setup_cmake.patch /tmp/cudf_setup_cmake.patch
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/cudf && \
@@ -132,13 +133,13 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-COPY cuml_build_$RAI_VERSION.patch /tmp/cuml_build_$RAI_VERSION.patch
-COPY cuml_add_cudart_${RAI_VERSION}.patch /tmp/cuml_add_cudart_${RAI_VERSION}.patch
-COPY cuml_cpp.cmakelist.patch /tmp/cuml_cpp.cmakelist.patch
-COPY cuml_cpp.comms.std.src.patch /tmp/cuml_cpp.comms.std.src.patch
-COPY cuml_cpp.test.cmakelists.patch /tmp/cuml_cpp.test.cmakelists.patch
-COPY cuml_setup.patch /tmp/cuml_setup.patch
-COPY cuml_patches_${RAI_VERSION}.patch /tmp/cuml_patches_${RAI_VERSION}.patch
+COPY patches/cuml_build_$RAI_VERSION.patch /tmp/cuml_build_$RAI_VERSION.patch
+COPY patches/cuml_add_cudart_${RAI_VERSION}.patch /tmp/cuml_add_cudart_${RAI_VERSION}.patch
+COPY patches/cuml_cpp.cmakelist.patch /tmp/cuml_cpp.cmakelist.patch
+COPY patches/cuml_cpp.comms.std.src.patch /tmp/cuml_cpp.comms.std.src.patch
+COPY patches/cuml_cpp.test.cmakelists.patch /tmp/cuml_cpp.test.cmakelists.patch
+COPY patches/cuml_setup.patch /tmp/cuml_setup.patch
+COPY patches/cuml_patches_${RAI_VERSION}.patch /tmp/cuml_patches_${RAI_VERSION}.patch
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/cuml && \
@@ -194,7 +195,7 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     make -j$PARALLEL_LEVEL && \
     make install 
 
-COPY bdb-build.patch /tmp/bdb-build.patch
+COPY patches/bdb-build.patch /tmp/bdb-build.patch
 
 RUN mkdir -p /opt/anaconda/include/bsql-rapids-thirdparty/ && \
    DIR_BSQL="bsql-rapids-thirdparty" && \
@@ -217,7 +218,7 @@ RUN git clone https://github.com/dask/dask.git /tmp/dask && \
    cd /tmp/dask && git checkout 2.16.0 && \
    python -m pip install .
 
-COPY blazingsql_patches_${RAI_VERSION}.patch /tmp/blazingsql_patches_${RAI_VERSION}.patch
+COPY patches/blazingsql_patches_${RAI_VERSION}.patch /tmp/blazingsql_patches_${RAI_VERSION}.patch
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/blazingsql && \
@@ -231,9 +232,5 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
 
 ENV CONDA_PREFIX=/opt/anaconda
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el 
-USER root 
-RUN mkdir /home/jovyan/.local  && chown -R $NB_UID:$NB_UID /home/jovyan/.local
 USER $NB_UID
-RUN pip install pandas==0.25.3
-
 

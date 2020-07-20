@@ -1,0 +1,18 @@
+diff --git a/build.sh b/build.sh
+index 4ed3674..1245f6f 100755
+--- a/build.sh
++++ b/build.sh
+@@ -57,11 +57,13 @@ function hasArg {
+ function ensureCMakeRan {
+     mkdir -p "${LIBRMM_BUILD_DIR}"
+     cd "${LIBRMM_BUILD_DIR}"
++    export CUDAHOSTCXX=$CXX
+     if (( RAN_CMAKE == 0 )); then
+         echo "Executing cmake for librmm..."
+         cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
+               -DCUDA_STATIC_RUNTIME="${CUDA_STATIC_RUNTIME}" \
+               -DCMAKE_CXX11_ABI=ON \
++              -DCMAKE_LIBRARY_PATH=$CONDA_PREFIX/lib \
+               -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+         RAN_CMAKE=1
+     fi

@@ -1,0 +1,13 @@
+diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
+index 533a0c2..74a1602 100644
+--- a/cpp/CMakeLists.txt
++++ b/cpp/CMakeLists.txt
+@@ -39,6 +39,8 @@ endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+ ###################################################################################################
+ # - compiler options ------------------------------------------------------------------------------
+
++string(REPLACE "-std=c++17" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
++
+ set(CMAKE_CXX_STANDARD 14)
+ set(CMAKE_C_COMPILER $ENV{CC})
+ set(CMAKE_CXX_COMPILER $ENV{CXX})

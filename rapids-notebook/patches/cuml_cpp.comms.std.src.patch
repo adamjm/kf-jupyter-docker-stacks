@@ -1,0 +1,13 @@
+diff --git a/cpp/comms/std/src/cuML_std_comms_impl.cpp b/cpp/comms/std/src/cuML_std_comms_impl.cpp
+index a3c0bf816..6039acc18 100644
+--- a/cpp/comms/std/src/cuML_std_comms_impl.cpp
++++ b/cpp/comms/std/src/cuML_std_comms_impl.cpp
+@@ -252,7 +252,7 @@ cumlStdCommunicator_impl::~cumlStdCommunicator_impl() {
+   CUDA_CHECK_NO_THROW(cudaFree(_sendbuff));
+   CUDA_CHECK_NO_THROW(cudaFree(_recvbuff));
+ 
+-#ifndef WITH_UCX
++#ifdef WITH_UCX
+   close_ucp_handle((struct comms_ucp_handle *)_ucp_handle);
+ #endif
+ }
