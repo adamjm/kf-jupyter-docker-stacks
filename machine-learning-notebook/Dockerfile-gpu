@@ -30,3 +30,6 @@ RUN export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
+RUN pip install jupyterlab-nvdashboard && \
+    jupyter labextension install jupyterlab-nvdashboard && \
+    jupyter lab build
