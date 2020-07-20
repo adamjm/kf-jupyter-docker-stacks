@@ -3,7 +3,7 @@
 ARG REPO=adamjm32
 ARG VERSION
 ARG ARCH
-ARG BASE_CONTAINER=$REPO/kf-scipy-notebook-${ARCH}:$VERSION
+ARG BASE_CONTAINER=$REPO/kf-kubeflow-notebook-${ARCH}:$VERSION
 FROM $BASE_CONTAINER
 
 LABEL maintainer="Adam Makarucha"

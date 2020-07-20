@@ -16,7 +16,6 @@ RUN export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
     conda install --yes \
     beautifulsoup4 \
     bottleneck \
-    ipywidgets \
     ipympl \ 
     pandas=0.25.* \
     patsy \
@@ -26,7 +25,6 @@ RUN export IBM_POWERAI_LICENSE_ACCEPT=$IBM_POWERAI_LICENSE_ACCEPT && \
     statsmodels \
     sympy \
     vincent \
-    widgetsnbextension \
     xlrd && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
