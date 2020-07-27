@@ -34,4 +34,6 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
+RUN pip install minio kubeflow-kale
+
 USER $NB_UID
