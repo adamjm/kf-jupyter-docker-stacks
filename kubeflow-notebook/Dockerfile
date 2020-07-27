@@ -13,10 +13,9 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.15.11/
 #RUN git clone https://github.com/kubeflow-kale/kale.git /kale
 USER $NB_UID
 # Install KF python libs  (using pip as these are not in the conda repos)
-RUN pip install elyra==1.0.0rc1 kubeflow-fairing 
-# && jupyter lab build && \
-#    fix-permissions $HOME && \
- #   fix-permissions $CONDA_DIR
+RUN pip install elyra==1.0.0rc2 kubeflow-fairing && jupyter lab build && \
+fix-permissions $HOME && \
+fix-permissions $CONDA_DIR
 
 #RUN git clone https://github.com/kubeflow-kale/jupyterlab-kubeflow-kale.git /jupyterlab-kubeflow-kale && \
 #    cd /jupyterlab-kubeflow-kale && \
