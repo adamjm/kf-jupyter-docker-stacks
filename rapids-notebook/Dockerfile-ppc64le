@@ -37,15 +37,15 @@ ENV JAVA_HOME=$JAVA_HOME
 
 USER root
 
-RUN mkdir /tmp/cppzmq && \
-     git clone https://github.com/zeromq/cppzmq.git /tmp/cppzmq && \
-     cd /tmp/cppzmq && git checkout v4.5.0 && \
-     mkdir build && \
-     cd build && \
-     cmake .. && \
-     make -j$PARALLEL_LEVEL && \
-     make install && \
- mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
+#RUN mkdir /tmp/cppzmq && \
+#     git clone https://github.com/zeromq/cppzmq.git /tmp/cppzmq && \
+#     cd /tmp/cppzmq && git checkout v4.5.0 && \
+#     mkdir build && \
+#     cd build && \
+#     cmake .. && \
+#     make -j$PARALLEL_LEVEL && \
+#     make install && \
+RUN mkdir /tmp/peg && cd /tmp/peg && wget https://www.piumarta.com/software/peg/peg-0.1.18.tar.gz && \
     tar xvf peg-0.1.18.tar.gz && cd peg-0.1.18/ && \
     make -j$PARALLEL_LEVEL && make install && \
     mkdir /tmp/libcypher && cd /tmp/libcypher && wget https://github.com/cleishm/libcypher-parser/releases/download/v0.6.1/libcypher-parser-0.6.1.tar.gz && \
@@ -224,12 +224,13 @@ RUN mkdir /tmp/cppzmq && \
     git clone https://github.com/zeromq/cppzmq.git /tmp/cppzmq && \
     cd /tmp/cppzmq && git checkout v4.5.0 && \
     mkdir build && \
-    cd build && \
-    cmake .. && \
-    make -j$PARALLEL_LEVEL && \
-    make install 
+    cd build
+#    cmake .. && \
+#    make -j$PARALLEL_LEVEL && \
+#    make install 
 
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda install --yes -n base -c conda-forge cppzmq && \
     mkdir /tmp/blazingsql && \
     git clone https://github.com/BlazingDB/blazingsql.git /tmp/blazingsql && \
     cd /tmp/blazingsql && \
