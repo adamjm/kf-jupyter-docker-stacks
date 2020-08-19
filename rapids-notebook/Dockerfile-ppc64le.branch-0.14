@@ -234,11 +234,13 @@ RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     mkdir /tmp/blazingsql && \
     git clone https://github.com/BlazingDB/blazingsql.git /tmp/blazingsql && \
     cd /tmp/blazingsql && \
-    git checkout $RAI_VERSION && \
+    git checkout branch-0.15 && \
     git submodule update --init --remote --recursive && \
     git apply /tmp/blazingsql_patches_${RAI_VERSION}.patch && \
     export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el && \
     ./build.sh
+
+RUN pip install pandas==0.25.3
 
 ENV CONDA_PREFIX=/opt/anaconda
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-ppc64el 
