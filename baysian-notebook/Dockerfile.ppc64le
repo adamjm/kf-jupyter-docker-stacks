@@ -21,16 +21,17 @@ USER $NB_UID
 RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
     conda install --quiet -y  pyodbc \
     imbalanced-learn \
-    xgboost \
     lightgbm \ 
     NLopt \
     Hyperopt \
-    Optuna \ 
-    GPyOpt \
+    scipy \
     scikit-optimize \
+    cmake=>3.13 \
     bayesian-optimization && \
-    conda clean --all -f -y && \
-    pip install minio pyhadoop ga tpot && \
+    conda clean --all -f -y
+
+RUN pip install gpyopt optuna minio pyhadoop ga tpot && \
+    pip install xgboost==1.1.1 && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
