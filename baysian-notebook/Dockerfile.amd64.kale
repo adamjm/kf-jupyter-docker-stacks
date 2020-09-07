@@ -1,0 +1,37 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+ARG REPO=adamjm32
+ARG VERSION
+ARG ARCH
+ARG BASE_CONTAINER=$REPO/kf-pyspark-notebook-${ARCH}:$VERSION
+FROM $BASE_CONTAINER
+
+LABEL maintainer="Adam Makarucha"
+USER root
+
+# ffmpeg for matplotlib anim & dvipng for latex labels
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends unixodbc-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Using the preferred mirror to download the file
+USER $NB_UID
+
+# Install Python 3 packages
+RUN eval "$(conda shell.bash hook |sed 's/base/base/g')" && \
+    conda install --quiet -y  pyodbc \
+    imbalanced-learn \
+    xgboost \
+    lightgbm \ 
+    NLopt \
+    Hyperopt \
+    Optuna \ 
+    GPyOpt \
+    scikit-optimize \
+    bayesian-optimization && \
+    conda clean --all -f -y && \
+    pip install minio pyhadoop ga tpot && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
+USER $NB_UID

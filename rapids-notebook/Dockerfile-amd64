@@ -36,10 +36,16 @@ USER $NB_UID
 
 RUN conda create --name rapids && eval "$(conda shell.bash hook |sed 's/base/rapids/g')" && \
     conda install -n rapids -c rapidsai -c nvidia -c conda-forge \
-    -c defaults rapids=0.13 python=3.7 cudatoolkit=10.2 && \
+    -c defaults rapids=0.15 python=3.7 cudatoolkit=10.2 && \
     conda install --quiet --yes -n rapids 'ipykernel=5.1.4=py37h39e3cac_0' && \
     python -m ipykernel install --user --name rapids --display-name "Python (rapids)" && \
     conda clean --all -f -y && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
+
+RUN conda install -n rapids -c blazingsql/label/cuda10.2 -c blazingsql -c rapidsai -c nvidia -c conda-forge -c defaults blazingsql python=3.7 && \
+    conda clean --all -f -y && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
+
 
